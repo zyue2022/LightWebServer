@@ -12,6 +12,7 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int 
       epoller_(new Epoller()),
       timer_(new HeapTimer()),
       threadPool_(new ThreadPool(threadNum)) {
+    // 当前工作目录是指命令行窗口中运行程序的目录
     /*获取资源目录*/
     srcDir_ = getcwd(nullptr, 256);
     assert(srcDir_);

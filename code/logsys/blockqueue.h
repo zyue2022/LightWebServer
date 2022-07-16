@@ -1,3 +1,8 @@
+/*
+ * @Description  : 封装生产者消费者模型，实现线程安全的阻塞队列
+ * @Date         : 2022-07-16 01:14:05
+ * @LastEditTime : 2022-07-16 20:19:46
+ */
 #ifndef MY_WEBSERVER_BLOCKQUEUE_H
 #define MY_WEBSERVER_BLOCKQUEUE_H
 
@@ -8,14 +13,10 @@
 #include <mutex>
 #include <queue>
 
-/*
- * 阻塞队列
- * 实现的线程安全的队列
- */
 template <class T>
 class BlockQueue {
 private:
-    std::queue<T> que_;  // 包装的双端队列
+    std::queue<T> que_;  // 共享队列
     std::mutex    mtx_;  // 互斥量
 
     std::condition_variable condConsumer_;  // 消费者条件变量
@@ -43,27 +44,21 @@ public:
     bool pop(T &item);
     bool pop(T &item, int timeout);
 
-    void flush();
+    void wakeupOneConsumer();
 };
 
-/*
- * 构造函数，初始化队列容量
- */
 template <typename T>
 BlockQueue<T>::BlockQueue(size_t MaxCapacity) : capacity_(MaxCapacity), isClose_(false) {
     assert(MaxCapacity > 0);
 }
 
-/*
- * 析构函数中释放资源
- */
 template <typename T>
 BlockQueue<T>::~BlockQueue() {
     close();
 }
 
-/*
- * 关闭，唤醒所有等待的事件
+/**
+ * @description: 用在析构函数中，释放资源，关闭前唤醒所有等待的事件
  */
 template <typename T>
 void BlockQueue<T>::close() {
@@ -73,8 +68,8 @@ void BlockQueue<T>::close() {
     condConsumer_.notify_all();
 }
 
-/*
- * 清空队列
+/**
+ * @description: 清空队列
  */
 template <typename T>
 void BlockQueue<T>::clear() {
@@ -83,52 +78,40 @@ void BlockQueue<T>::clear() {
     std::swap(tmp, que_);
 }
 
-/*
- * 唤醒一个消费者执行任务
+/**
+ * @description: 唤醒一个消费者
  */
 template <typename T>
-void BlockQueue<T>::flush() {
+void BlockQueue<T>::wakeupOneConsumer() {
     condConsumer_.notify_one();
 }
 
-/*
- * 获取队列大小
- */
 template <typename T>
 size_t BlockQueue<T>::size() {
     std::lock_guard<std::mutex> locker(mtx_);
     return que_.size();
 }
 
-/*
- * 获取队列容量
- */
 template <typename T>
 size_t BlockQueue<T>::capacity() {
     std::lock_guard<std::mutex> locker(mtx_);
     return capacity_;
 }
 
-/*
- * 返回队列是否为空
- */
 template <typename T>
 bool BlockQueue<T>::empty() {
     std::lock_guard<std::mutex> locker(mtx_);
     return que_.empty();
 }
 
-/*
- * 返回队列是否满了
- */
 template <typename T>
 bool BlockQueue<T>::full() {
     std::lock_guard<std::mutex> locker(mtx_);
     return que_.size() >= capacity_;
 }
 
-/*
- * 向队尾加入一个元素
+/**
+ * @description: 向队尾加入一个元素
  */
 template <typename T>
 void BlockQueue<T>::push(const T &item) {
@@ -143,8 +126,8 @@ void BlockQueue<T>::push(const T &item) {
     condConsumer_.notify_one();
 }
 
-/*
- * 在队头位置弹出一个元素
+/**
+ * @description: 在队头弹出一个元素
  */
 template <typename T>
 bool BlockQueue<T>::pop(T &item) {
@@ -164,10 +147,8 @@ bool BlockQueue<T>::pop(T &item) {
     return true;
 }
 
-/*
- * 在队头位置弹出一个元素
- * 重载版
- * 规定了最大等待时间，若在规定时间内未等到则直接返回false
+/**
+ * @description: 在队头弹出一个元素，设有阻塞时间
  */
 template <typename T>
 bool BlockQueue<T>::pop(T &item, int timeout) {

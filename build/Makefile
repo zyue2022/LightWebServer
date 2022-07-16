@@ -1,5 +1,5 @@
 CXX = g++
-CFLAGS = -std=c++17 -O2 -g -Wall
+CFLAGS = -std=c++14 -O2 -g -Wall
 
 TARGET = serverApp
 OBJS = ../code/buffer/*.cpp ../code/http/*.cpp ../code/logsys/*.cpp \

@@ -121,7 +121,7 @@ ssize_t HttpConn::write(int *saveErrno) {
             iov_[0].iov_base = (uint8_t *)iov_[0].iov_base + len;
             iov_[0].iov_len -= len;
             /*回收对应长度的空间*/
-            writeBuff_.retrieve(len);
+            writeBuff_.hasRead(len);
         }
         /*任需发送的数据大于10240的情况下会继续发送 或 若在LT模式下，只会发送一次，ET模式下会一直发送，直到完毕*/
         /*这里有点问题，如果是LT模式，且需要写的数据小于等于10240，那么连接会被之间关闭，这里可以选择在调用函数处修改判断条件*/

@@ -1,5 +1,10 @@
-#ifndef MY_WEBSERVER_BUFFER_H
-#define MY_WEBSERVER_BUFFER_H
+/*
+ * @Description  : 自定义缓冲区类
+ * @Date         : 2022-07-16 01:14:05
+ * @LastEditTime : 2022-07-16 19:56:35
+ */
+#ifndef BUFFER_H
+#define BUFFER_H
 
 #include <assert.h>
 #include <sys/uio.h> /*readv*/
@@ -16,10 +21,10 @@ private:
     std::atomic<std::size_t> readPos_;   // 读指针所在的下标
     std::atomic<std::size_t> writePos_;  // 写指针所在的下标
 
-    char       *beginPtr_();
-    const char *beginPtr_() const;
+    char *beginPtr() const;
 
-    void makeSpace_(size_t len);
+    void extendSpace(size_t len);
+    void ensureWritable(size_t len);
 
 public:
     Buffer(int initBufferSize = 1024);
@@ -31,19 +36,14 @@ public:
     size_t readableBytes() const;
     size_t prependableBytes() const;
 
-    char       *beginRead();
-    const char *beginRead() const;
+    char *beginRead() const;
+    char *beginWrite() const;
 
-    char       *beginWrite();
-    const char *beginWrite() const;
+    void hasRead(size_t len);
+    void hasWritten(size_t len);
 
-    void        retrieve(size_t len);
     void        retrieveUntil(const char *end);
     std::string retrieveAllToStr();
-
-    void ensureWritable(size_t len);
-
-    void hasWritten(size_t len);
 
     void append(const char *str, size_t len);
     void append(const std::string &str);
@@ -53,4 +53,4 @@ public:
     ssize_t writeFd(int fd, int *saveErrno);
 };
 
-#endif  //MY_WEBSERVER_BUFFER_H
+#endif  //BUFFER_H

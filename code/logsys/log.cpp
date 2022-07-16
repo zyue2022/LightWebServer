@@ -1,55 +1,58 @@
 #include "log.h"
 
-/*
- * 构造函数中初始化一系列变量,为什么isOpen_(true)会引发段错误
- */
 Log::Log()
     : lineCount_(0),
       today_(0),
-      isOpen_(false),
+      isOpen_(false),  // isOpen_必须初始化为false，因为可能日志没init
       isAsync_(false),
       fp_(nullptr),
       que_(nullptr),
-      writeThread_(nullptr) {}
+      writeThread_(nullptr),
+      curTimeval(nullptr),
+      curTm(nullptr) {}
 
-/*
- * 初始化Log类设置
+/**
+ * @description: 初始化Log类对象
+ * @param {int} level           日志级别
+ * @param {char} *path          文件路径
+ * @param {char} *suffix        文件后缀
+ * @param {int} maxQueueSize    异步阻塞队列大小
  */
 void Log::init(int level, const char *path, const char *suffix, int maxQueueSize) {
     isOpen_ = true;
     level_  = level;
 
-    /*如果消息队列大于0，说明启用了异步写入log，那就要初始化异步写入所需的变量*/
+    /*如果消息队列大于0，说明启用了异步写入log*/
     if (maxQueueSize > 0) {
-        /*表示开启异步写入*/
+        /* 开启异步写入 */
         isAsync_ = true;
         if (!que_) {
             /*获取deque_的unique智能指针*/
             que_ = std::make_unique<BlockQueue<std::string>>();
-            /*获取writeThread_的unique智能指针*/
+            /*创建异步写线程，获取writeThread_的unique智能指针*/
             writeThread_ = std::make_unique<std::thread>(flushLogThread);
         }
     } else {
-        /*表示不开启异步写入*/
+        /* 未开启异步写入 */
         isAsync_ = false;
     }
 
     /*从第一行开始*/
     lineCount_ = 0;
-    /*获取当前时间，保存到变量t中*/
-    time_t     timer   = time(nullptr);
-    struct tm *sysTime = localtime(&timer);
-    struct tm  t       = *sysTime;
+    /*获取当前时间*/
+    curTimeval = new timeval();
+    curTm      = new tm();
+    updateTime();
     /*初始化文件路径以及后缀名*/
     path_   = path;
     suffix_ = suffix;
     /*根据 路径+时间+后缀名创建log文件*/
     char fileName[LOG_NAME_LEN] = {0};
-    snprintf(fileName, LOG_NAME_LEN - 1, "%s/%04d_%02d_%02d%s", path_, t.tm_year + 1900,
-             t.tm_mon + 1, t.tm_mday, suffix_);
+    snprintf(fileName, LOG_NAME_LEN - 1, "%s/%04d_%02d_%02d%s", path_, curTm->tm_year + 1900,
+             curTm->tm_mon + 1, curTm->tm_mday, suffix_);
 
     /*将日期保存到today_变量中*/
-    today_ = t.tm_mday;
+    today_ = curTm->tm_mday;
 
     /*创建文件，使用互斥量保证线程安全*/
     {
@@ -63,52 +66,56 @@ void Log::init(int level, const char *path, const char *suffix, int maxQueueSize
         fp_ = fopen(fileName, "a");
         /*如果未创建成功，说明没有对应的目录，创建目录后再创建文件即可*/
         if (!fp_) {
-            /*创建目录*/
             mkdir(path_, 0777);
-            /*创建文件*/
             fp_ = fopen(fileName, "a");
         }
         assert(fp_ != nullptr);
     }
 }
 
-/*
- * 局部静态变量，线程安全的初始化方式
- * 单例模式，返回一个LOG对象的引用
+/**
+ * @description: 局部静态变量，懒汉单例模式
  */
 Log *Log::instance() {
     static Log instance;
     return &instance;
 }
 
-/*
- * 线程的执行函数
+/**
+ * @description: 更新当前时间
+ */
+void Log::updateTime() {
+    gettimeofday(curTimeval, nullptr);
+    time_t tSec = curTimeval->tv_sec;
+    curTm       = localtime(&tSec);
+}
+
+/**
+ * @description:异步写线程的工作函数，静态的
  */
 void Log::flushLogThread() { Log::instance()->asyncWrite_(); }
 
-/*
- * 异步取出队列中数据，写入文件中
- * 不停循环取出数据写入文件，只有队列为空时会阻塞等待
+/**
+ * @description: 循环从阻塞队列取出数据写入磁盘日志文件，只有队列为空时会休眠等待
  */
 void Log::asyncWrite_() {
     std::string str = "";
-    // 从阻塞队列中取出数据，写入磁盘日志文件
     while (que_->pop(str)) {
         std::lock_guard<std::mutex> locker(mtx_);
         fputs(str.c_str(), fp_);
     }
 }
 
-/*
- * 在析构时将所有log信息写入文件，再关闭写入线程
+/**
+ * @description: 在析构时将所有log信息写入文件，再关闭写入线程，关闭文件
  */
 Log::~Log() {
     if (writeThread_ && writeThread_->joinable()) {
         while (!que_->empty()) {
-            que_->flush();  // 唤醒一个消费者执行任务
+            que_->wakeupOneConsumer();  // 唤醒一个消费者执行任务
         }
         que_->close();
-        writeThread_->join();
+        writeThread_->join();  // 回收子线程
     }
     if (fp_) {
         std::lock_guard<std::mutex> locker(mtx_);
@@ -118,41 +125,25 @@ Log::~Log() {
     isOpen_ = false;
 }
 
-/*
- * 清空缓冲区，将当前的数据都写入到文件中去
+/**
+ * @description: 将当前的日志数据都写入到文件中
  */
 void Log::flush() {
     if (isAsync_) {
         /*如果是异步模式，需要将整个队列都写入*/
-        que_->flush();
+        que_->wakeupOneConsumer();
     }
     /*刷新文件缓冲区*/
     fflush(fp_);  // fflush()会强迫将系统缓冲区内的数据写回参数stream 指定的文件中
 }
 
-/*
- * 返回文件是否打开
- */
 bool Log::isOpen() { return isOpen_; }
 
-/*
- * 返回日志级别
- */
-int Log::getLevel() {
-    std::lock_guard<std::mutex> locker(mtx_);
-    return level_;
-}
+int Log::getLevel() { return level_; }
 
-/*
- * 设置日志级别
- */
-void Log::setLevel(int level) {
-    std::lock_guard<std::mutex> locker(mtx_);
-    level_ = level;
-}
-
-/*
- * 向缓冲区中加入log的级别信息
+/**
+ * @description: 向缓冲区中加入log的级别信息
+ * @param {int} level
  */
 void Log::appendLogLevelTitle_(int level) {
     switch (level) {
@@ -174,35 +165,28 @@ void Log::appendLogLevelTitle_(int level) {
     }
 }
 
-/*
- * 向log文件中写入log信息
+/**
+ * @description: 按天记录、超行分文件
  */
-void Log::write(int level, const char *format, ...) {
-    /*获取当前时间*/
-    struct timeval now = {0, 0};
-    gettimeofday(&now, nullptr);
-    time_t     tSec    = now.tv_sec;
-    struct tm *sysTime = localtime(&tSec);
-    struct tm  t       = *sysTime;
-
+void Log::adjustFile() {
     /*如果日期变了，也就是到第二天了，或者当前log文件行数达到规定的最大值时都需要创建一个新的log文件*/
-    if (today_ != t.tm_mday || (lineCount_ && (lineCount_ % MAX_LINES) == 0)) {
+    if (today_ != curTm->tm_mday || (lineCount_ && (lineCount_ % MAX_LINES) == 0)) {
         /*最终文件路径存储变量*/
         char newFile[LOG_NAME_LEN];
         char tail[36] = {0};
         /*根据时间获取文件名*/
-        snprintf(tail, 36, "%04d_%02d_%02d", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday);
-        /*如果日期变化了，那么需要将toDay变量更改为当前日期*/
-        if (today_ != t.tm_mday) {
-            /*拼接 path_ tail suffix_ 获取最终文件名*/
+        snprintf(tail, 36, "%04d_%02d_%02d", curTm->tm_year + 1900, curTm->tm_mon + 1,
+                 curTm->tm_mday);
+
+        if (today_ != curTm->tm_mday) {
+            /*日期变化了，拼接 path_ tail suffix_ 获取最新文件名*/
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s%s", path_, tail, suffix_);
-            /*更改today变量*/
-            today_ = t.tm_mday;
+            /*更新today变量*/
+            today_ = curTm->tm_mday;
             /*重置文件行计数变量*/
             lineCount_ = 0;
         } else {
             /*进入到此分支表示文件行数超过了最大行数，需要分出第二个log文件来存储今日的文件*/
-            /*文件名由 path_  tail (lineCount_  / MAX_LINES) suffix_ 组成*/
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s-%d%s", path_, tail,
                      (lineCount_ / MAX_LINES), suffix_);
         }
@@ -217,41 +201,49 @@ void Log::write(int level, const char *format, ...) {
         fp_ = fopen(newFile, "a");
         assert(fp_ != nullptr);
     }
+}
+
+/**
+ * @description: 向log文件中写入log信息，写入前践行分类策略
+ * @param {int} level
+ * @param {char} *format
+ */
+void Log::write(int level, const char *format, ...) {
+    updateTime();
+    adjustFile();
 
     /* ... 使用的可变参数列表*/
     va_list vaList;
-    {
-        /*上锁，保证线程安全*/
-        std::unique_lock<std::mutex> locker(mtx_);
-        /*增加文件行数指示变量*/
-        lineCount_++;
-        /*组装信息至缓冲区buff中*/
-        int n = snprintf(buff_.beginWrite(), 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
-                         t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,
-                         now.tv_usec);
-        /*移动缓冲区的指针，表示写了多少字节数据到缓冲区中*/
-        buff_.hasWritten(n);
-        /*向缓冲区中写入日志级别信息*/
-        appendLogLevelTitle_(level);
 
-        /*根据用户传入的参数，向缓冲区添加数据*/
-        va_start(vaList, format);  // 这里format中由用户的写入信息，将其添加到自定义缓冲区中
-        int m = vsnprintf(buff_.beginWrite(), buff_.writableBytes(), format, vaList);
-        va_end(vaList);
-        /*移动缓冲区的指针，表示写了多少字节数据到缓冲区中*/
-        buff_.hasWritten(m);
-        /*行尾写入换行符*/
-        buff_.append("\n\0", 2);
+    /*上锁，保证线程安全*/
+    std::unique_lock<std::mutex> locker(mtx_);
 
-        /*根据变量选择是否异步写入*/
-        if (isAsync_ && que_ && !que_->full()) {
-            /*如果以上三个条件都满足，那么进行异步写入*/
-            que_->push(buff_.retrieveAllToStr());
-        } else {
-            /*否则直接写入至文件*/
-            fputs(buff_.beginRead(), fp_);
-        }
-        /*回收所有空间*/
-        buff_.clearAll();
+    lineCount_++;
+
+    /*组装信息至缓冲区buff中*/
+    int n = snprintf(buff_.beginWrite(), 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
+                     curTm->tm_year + 1900, curTm->tm_mon + 1, curTm->tm_mday, curTm->tm_hour,
+                     curTm->tm_min, curTm->tm_sec, curTimeval->tv_usec);
+    buff_.hasWritten(n);
+    /*向缓冲区中写入日志级别信息*/
+    appendLogLevelTitle_(level);
+
+    /*根据用户传入的参数，向缓冲区添加数据*/
+    va_start(vaList, format);  // 这里format中由用户的写入信息，将其添加到自定义缓冲区中
+    int m = vsnprintf(buff_.beginWrite(), buff_.writableBytes(), format, vaList);
+    va_end(vaList);
+    buff_.hasWritten(m);
+    /*行尾写入换行符*/
+    buff_.append("\n\0", 2);
+
+    /*根据变量选择是否异步写入*/
+    if (isAsync_ && que_ && !que_->full()) {
+        /*如果以上三个条件都满足，那么进行异步写入*/
+        que_->push(buff_.retrieveAllToStr());
+    } else {
+        /*否则直接写入至文件*/
+        fputs(buff_.beginRead(), fp_);
     }
+    /*回收所有空间*/
+    buff_.clearAll();
 }
