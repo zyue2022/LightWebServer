@@ -2,6 +2,9 @@
 
 bool WebServer::isET = false;
 
+/**
+ * @description: 构造函数中初始化各类资源
+ */
 WebServer::WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int sqlPort,
                      const char *sqlUser, const char *sqlPwd, const char *dbName, int connPoolNum,
                      int threadNum, bool openLog, int logLevel, int logQueSize)
@@ -49,8 +52,8 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int 
     }
 }
 
-/*
- * 析构函数中关闭连接以及申请的资源
+/**
+ * @description: 析构函数中关闭连接以及申请的资源
  */
 WebServer::~WebServer() {
     isClose_ = true;
@@ -59,15 +62,16 @@ WebServer::~WebServer() {
     SqlConnPool::instance()->closePool();
 }
 
-/*
- * 初始化事件工作模式
- * EPOLLIN：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）
- * EPOLLOUT：表示对应的文件描述符可以写
- * EPOLLERR：表示对应的文件描述符发生错误
- * EPOLLHUP：表示对应的文件描述符被挂断；读写关闭
- * EPOLLRDHUP 表示读关闭
- * EPOLLET：将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)而言的
- * EPOLLONESHOT：只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
+/**
+ * @description:  初始化事件工作模式
+ *                  EPOLLIN：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）
+ *                  EPOLLOUT：表示对应的文件描述符可以写
+ *                  EPOLLERR：表示对应的文件描述符发生错误
+ *                  EPOLLHUP：表示对应的文件描述符被挂断；读写关闭
+ *                  EPOLLRDHUP 表示读关闭
+ *                  EPOLLET：将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)而言的
+ * E                POLLONESHOT：只监听一次事件，当监听完后如果还需要监听这个socket，就要再次把这个socket加入到EPOLL队列里
+ * @param {int} trigMode
  */
 void WebServer::initEventMode_(int trigMode) {
     listenEvent_ = EPOLLHUP;
@@ -101,9 +105,9 @@ void WebServer::initEventMode_(int trigMode) {
     WebServer::isET = (listenEvent_ & EPOLLET);
 }
 
-/*
- * 设置文件描述符为非阻塞，使用fcntl(fd, F_GETFD, 0)获取原有描述符
- * F_SETFL 设置描述符状态标志
+/**
+ * @description: 设置文件描述符为非阻塞
+ * @param {int} fd
  */
 int WebServer::setFdNonblock(int fd) {
     assert(fd > 0);
@@ -113,8 +117,8 @@ int WebServer::setFdNonblock(int fd) {
     return old_option;
 }
 
-/*
- * 创建监听描述符
+/**
+ * @description: 创建本机监听描述符
  */
 bool WebServer::initSocket_() {
     int ret = 0;
@@ -195,8 +199,10 @@ bool WebServer::initSocket_() {
     return true;
 }
 
-/*
- * 向客户端发送错误消息
+/**
+ * @description: 向客户端发送错误消息
+ * @param {int} fd
+ * @param {char} *info
  */
 void WebServer::sendError_(int fd, const char *info) {
     assert(fd > 0);
@@ -208,8 +214,9 @@ void WebServer::sendError_(int fd, const char *info) {
     close(fd);
 }
 
-/*
- * 删除epoller描述符监听事件,关闭连接
+/**
+ * @description: 关闭客户端连接
+ * @param {HttpConn} *client
  */
 void WebServer::closeConn_(HttpConn *client) {
     assert(client);
@@ -218,8 +225,10 @@ void WebServer::closeConn_(HttpConn *client) {
     client->closeConn();
 }
 
-/*
- * 初始化httpconn类对象，添加对应连接的计时器，添加epoll监听事件
+/**
+ * @description: 初始化httpconn类对象，添加对应连接的计时器，添加epoll监听事件
+ * @param {int} fd
+ * @param {sockaddr_in} addr
  */
 void WebServer::addClient_(int fd, sockaddr_in addr) {
     assert(fd > 0);
@@ -237,8 +246,8 @@ void WebServer::addClient_(int fd, sockaddr_in addr) {
     LOG_INFO("Client[%d] in!", users_[fd].getFd());
 }
 
-/*
- * 处理客户端连接事件
+/**
+ * @description: 处理客户端连接事件
  */
 void WebServer::dealListen_() {
     struct sockaddr_in addr;
@@ -262,8 +271,8 @@ void WebServer::dealListen_() {
     } while (WebServer::isET);
 }
 
-/*
- * 表示对应连接上有读写事件发生，需要调整计时器中的过期时间
+/**
+ * @description: 更新计时器中的过期时间
  */
 void WebServer::extentTime_(HttpConn *client) {
     assert(client);
@@ -272,8 +281,9 @@ void WebServer::extentTime_(HttpConn *client) {
     }
 }
 
-/*
- * 解析http报文
+/**
+ * @description: 处理http报文请求
+ * @param {HttpConn} *client
  */
 void WebServer::onProcess_(HttpConn *client) {
     if (client->process()) {
@@ -285,8 +295,9 @@ void WebServer::onProcess_(HttpConn *client) {
     }
 }
 
-/*
- * 读取socket传来的数据，并调用onProcess函数处理
+/**
+ * @description: 读取socket传来的数据，并调用onProcess函数处理
+ * @param {HttpConn} *client
  */
 void WebServer::onRead_(HttpConn *client) {
     assert(client);
@@ -304,8 +315,9 @@ void WebServer::onRead_(HttpConn *client) {
     onProcess_(client);
 }
 
-/*
- * 处理连接中的读取数据事件，调整当前连接的过期时间，向线程池中添加读数据的任务
+/**
+ * @description: 处理连接中的读取数据事件，调整当前连接的过期时间，向线程池中添加读数据的任务
+ * @param {HttpConn} *client
  */
 void WebServer::dealRead_(HttpConn *client) {
     assert(client);
@@ -313,8 +325,9 @@ void WebServer::dealRead_(HttpConn *client) {
     threadPool_->addTask(std::bind(&WebServer::onRead_, this, client));
 }
 
-/*
- * 向对应的socket发送数据
+/**
+ * @description: 向对应的socket发送响应报文数据
+ * @param {HttpConn} *client
  */
 void WebServer::onWrite_(HttpConn *client) {
     assert(client);
@@ -323,7 +336,7 @@ void WebServer::onWrite_(HttpConn *client) {
 
     /*调用httpconn类的write方法向socket发送数据*/
     ret = client->write(&writeErrno);
-    if (client->toWriteBytes() == 0) {
+    if (client->bytesNeedWrite() == 0) {
         /*如果还需要写的数据为0，那么完成传输，检查客户端是否设置了长连接字段*/
         if (client->isKeepAlive()) {
             /*如果客户端设置了长连接，那么调用OnProcess函数，因为此时的client->process()会返回false，所以该连接会重新注册epoll的EPOLLIN事件*/
@@ -342,8 +355,9 @@ void WebServer::onWrite_(HttpConn *client) {
     closeConn_(client);
 }
 
-/*
- * 处理连接中的发送数据事件，调整当前连接的过期时间，向线程池中添加发送数据的任务
+/**
+ * @description: 处理连接中的发送数据事件，调整当前连接的过期时间，向线程池中添加发送数据的任务
+ * @param {HttpConn} *client
  */
 void WebServer::dealWrite_(HttpConn *client) {
     assert(client);
@@ -351,8 +365,8 @@ void WebServer::dealWrite_(HttpConn *client) {
     threadPool_->addTask(std::bind(&WebServer::onWrite_, this, client));
 }
 
-/*
- * 启动服务器
+/**
+ * @description: 启动服务器，主线程工作处
  */
 void WebServer::start() {
     /*epoll wait timeout == -1 无事件将阻塞，如果timeout大于0时才会设置超时信号，后面可以改为根据最接近的超时事件设置超时时长*/

@@ -84,14 +84,11 @@ ssize_t HttpConn::write(int *saveErrno) {
         len = writev(fd_, iov_, iovCnt_);
         if (len <= 0) {
             *saveErrno = errno;
-            /*若errno返回EAGAIN，需要重新注册EPOLL上的EPOLLOUT事件*/
+            /*若errno返回EAGAIN，需要重新注册EPOLL上的EPOLLOUT事件  ?  */
             break;
         }
 
-        if (bytesNeedWrite() == 0) {
-            /* 每次聚集写后都判断是否还有数据需要发送，没有就退出 */
-            break;
-        } else if (static_cast<size_t>(len) > iov_[0].iov_len) {
+        if (static_cast<size_t>(len) >= iov_[0].iov_len) {
             /*说明第一块区域的数据是发送完毕，再根据多发送了多少调整iov_[1]的取值*/
             iov_[1].iov_base = (uint8_t *)iov_[1].iov_base + (len - iov_[0].iov_len);
             iov_[1].iov_len -= (len - iov_[0].iov_len);
@@ -112,27 +109,21 @@ ssize_t HttpConn::write(int *saveErrno) {
     return len;
 }
 
-/*
- * 解析http请求数据
- * 本函数实际上时有bug的，不具备处理非完整请求的能力
- * 因为request_.parse(readBuff_)返回false可能是因为请求不完整，需要继续读取http请求数据
- * 但在此函数中却直接返回了400
- * 修改方案：request_.parse()修改为返回解析状态，然后本函数根据解析状态返回true or false
+/**
+ * @description: 处理每个客户端的连接，调度解析类与响应类
+ *              - 成员变量中的解析类用来解析请求；
+ *              - 成员变量中响应类用来制造响应；
  */
 bool HttpConn::process() {
     /*
-     * 首先初始化一个httprequest类对象，负责处理请求的事务，
-     * 这里不需要每一次都进行初始化，需要保存上次连接的状态，用以指示是否为新的http请求
-     * 所以只有当上一次的请求为完成状态时，才回去重新初始化request_成员，以重从开始解析一个http请求
+     * httprequest类对象负责解析请求，它会在自己的构造函数中init，
+     * 一个客户端连接可能有多次请求，需要保存上次连接的状态，用以指示是否为新的http请求
+     * 只有当上一次的请求为完成状态时，才重新init，以重新开始解析一个http请求
      */
-    if (request_.state() == HttpRequest::FINISH) {
-        request_.init();
-    }
+    if (request_.state() == HttpRequest::FINISH) request_.init();
+
     /*检查读缓存区中是否存在可读数据*/
-    if (readBuff_.readableBytes() <= 0) {
-        /*小于等于0表示没有数据可读，直接返回false*/
-        return false;
-    }
+    if (readBuff_.readableBytes() <= 0) return false;
 
     HttpRequest::HTTP_CODE processStatus = request_.parse(readBuff_);
     if (processStatus == HttpRequest::GET_REQUEST) {
@@ -141,7 +132,7 @@ bool HttpConn::process() {
         /*初始化一个httpresponse对象，负责http应答阶段*/
         response_.init(srcDir, request_.path(), request_.isKeepAlive(), 200);
     } else if (processStatus == HttpRequest::NO_REQUEST) {
-        /*请求没有读取完整，应该继续读取请求,返回false让上一层调用函数*/
+        /*请求没有读取完整，应该继续读取请求,返回false让上一层继续读取请求数据*/
         return false;
     } else {
         /*其他情况表示解析失败，则返回400错误*/
@@ -151,10 +142,9 @@ bool HttpConn::process() {
     /*httpresponse负责拼装返回的头部以及需要发送的文件*/
     response_.makeResponse(writeBuff_);
     /*响应头，将写缓冲区赋值给iov_，后面使用writev函数发送至客户端*/
-    iov_[0].iov_base = const_cast<char *>(writeBuff_.beginRead());
+    iov_[0].iov_base = writeBuff_.beginRead();
     iov_[0].iov_len  = writeBuff_.readableBytes();
     iovCnt_          = 1;
-
     /*如果需要返回服务器的文件内容，且文件内容不为空*/
     if (response_.fileLen() > 0 && response_.file()) {
         /*将文件映射到内存后的地址以及文件长度赋值给iov_变量*/

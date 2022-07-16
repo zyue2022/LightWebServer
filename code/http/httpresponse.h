@@ -1,3 +1,8 @@
+/*
+ * @Description  : HTTP应答类
+ * @Date         : 2022-07-16 01:14:05
+ * @LastEditTime : 2022-07-17 01:41:47
+ */
 #ifndef MY_WEBSERVER_HTTPRESPONSE_H
 #define MY_WEBSERVER_HTTPRESPONSE_H
 

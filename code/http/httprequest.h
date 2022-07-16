@@ -1,3 +1,8 @@
+/*
+ * @Description  : HTTP请求的解析类
+ * @Date         : 2022-07-16 01:14:05
+ * @LastEditTime : 2022-07-17 00:52:46
+ */
 #ifndef MY_WEBSERVER_HTTPREQUEST_H
 #define MY_WEBSERVER_HTTPREQUEST_H
 
@@ -34,11 +39,12 @@ private:
     PARSE_STATE state_;                           // 状态机状态
     std::string method_, path_, version_, body_;  // 请求头中的信息
 
-    std::unordered_map<std::string, std::string> header_;  // 请求头字段转化为hashmap
-    std::unordered_map<std::string, std::string> post_;  // 以键值对的方式保存请求体中的信息
+    /* 以键值对的方式保存请求头、请求体中的信息 */
+    std::unordered_map<std::string, std::string> header_;
+    std::unordered_map<std::string, std::string> post_;
 
     // 静态常量
-    static const std::unordered_set<std::string>      DEFAULT_HTML;  // 默认的回页面的地址
+    static const std::unordered_set<std::string>      DEFAULT_HTML;      // 各类型页面的地址
     static const std::unordered_map<std::string, int> DEFAULT_HTML_TAG;  // 默认的HTML标签
 
 public:
@@ -50,13 +56,10 @@ public:
     HTTP_CODE parse(Buffer &buff);
 
     PARSE_STATE state() const;
-
     std::string path() const;
     std::string method() const;
     std::string version() const;
-
     std::string getPost(const std::string &key) const;
-    std::string getPost(const char *key) const;
 
     bool isKeepAlive() const;
 

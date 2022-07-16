@@ -1,8 +1,5 @@
 #include "httpresponse.h"
 
-/*
- * 静态变量，返回类型键值对
- */
 const std::unordered_map<std::string, std::string> HttpResponse::SUFFIX_TYPE = {
     {".html", "text/html"},
     {".xml", "text/xml"},
@@ -25,9 +22,6 @@ const std::unordered_map<std::string, std::string> HttpResponse::SUFFIX_TYPE = {
     {".js", "text/javascript "},
 };
 
-/*
- * 静态变量，状态码键值对
- */
 const std::unordered_map<int, std::string> HttpResponse::CODE_STATUS = {
     {200, "OK"},
     {400, "Bad Request"},
@@ -35,30 +29,21 @@ const std::unordered_map<int, std::string> HttpResponse::CODE_STATUS = {
     {404, "Not Found"},
 };
 
-/*
- * 静态变量，错误码与页面对应关系
- */
 const std::unordered_map<int, std::string> HttpResponse::CODE_PATH = {
     {400, "/400.html"},
     {403, "/403.html"},
     {404, "/404.html"},
 };
 
-/*
- * 构造函数中初始化相关变量
- */
 HttpResponse::HttpResponse()
     : code_(-1), isKeepAlive_(false), path_(""), srcDir_(""), mmFile_(nullptr) {
     mmFileStat_ = {0};
 }
 
-/*
- * 析构函数释放资源
- */
 HttpResponse::~HttpResponse() { unmapFile(); }
 
-/*
- * 解除内存映射
+/**
+ * @description: 解除内存映射，由析构函数调用
  */
 void HttpResponse::unmapFile() {
     if (mmFile_) {
@@ -67,8 +52,8 @@ void HttpResponse::unmapFile() {
     }
 }
 
-/*
- * 根据参数初始化httpResponse中变量
+/**
+ * @description: 初始化httpResponse类对象
  */
 void HttpResponse::init(const std::string &srcDir, const std::string &path, bool isKeepAlive,
                         int code) {
@@ -86,23 +71,23 @@ void HttpResponse::init(const std::string &srcDir, const std::string &path, bool
     mmFileStat_ = {0};
 }
 
-/*
- * 返回状态码信息
+/**
+ * @description: 返回状态码信息
  */
 int HttpResponse::code() const { return code_; }
 
-/*
- * 返回文件地址
+/**
+ * @description: 返回请求的资源文件的映射到内存中的地址
  */
 char *HttpResponse::file() const { return mmFile_; }
 
-/*
- * 返回文件大小
+/**
+ * @description: 返回请求的资源文件大小
  */
 size_t HttpResponse::fileLen() const { return mmFileStat_.st_size; }
 
-/*
- * 获取返回文件类型
+/**
+ * @description: 获取返回文件类型
  */
 std::string HttpResponse::getFileType_() {
     /*根据后缀名，判断文件类型*/
@@ -121,8 +106,8 @@ std::string HttpResponse::getFileType_() {
     return "text/plain";
 }
 
-/*
- * 映射错误码为400，403，404的代码文件，将文件信息存入mmFileStat_变量中
+/**
+ * @description: 映射错误码为400，403，404的页面文件，将文件信息存入mmFileStat_变量中
  */
 void HttpResponse::errorHtml_() {
     /*若返回码为400，403，404其中之一，则将对应的文件路径与信息读取出来，并将文件信息保存mmFileStat_*/
@@ -132,8 +117,10 @@ void HttpResponse::errorHtml_() {
     }
 }
 
-/*
- * 打开文件失败，组装返回信息，写入到发送缓冲区中
+/**
+ * @description: 打开文件失败，组装返回信息，写入到发送缓冲区中
+ * @param {Buffer} &buff
+ * @param {string} message
  */
 void HttpResponse::errorContent(Buffer &buff, std::string message) {
     std::string body;
@@ -154,10 +141,11 @@ void HttpResponse::errorContent(Buffer &buff, std::string message) {
     buff.append(body);
 }
 
-/*
- * 将返回信息中的 状态行 添加到写缓冲区中
- * 状态行示例：HTTP/1.1 200 OK
- * CODE_STATUS中含有200，400，403，404这四个状态
+/**
+ * @description: 将返回信息中的 状态行 添加到写缓冲区中
+ *              - 状态行示例：HTTP/1.1 200 OK
+ *              - CODE_STATUS中含有200，400，403，404这四个状态
+ * @param {Buffer} &buff
  */
 void HttpResponse::addStateLine_(Buffer &buff) {
     std::string status;
@@ -174,9 +162,9 @@ void HttpResponse::addStateLine_(Buffer &buff) {
     buff.append("HTTP/1.1 " + std::to_string(code_) + " " + status + "\r\n");
 }
 
-/*
- * 将返回信息中的 消息报头 添加到写缓冲区中
- * 其实返回头中是没有Connection 与 keep-alive 这两个字段的，不清楚作者为什么要加上
+/**
+ * @description: 将返回信息中的 消息报头 添加到写缓冲区中
+ * @param {Buffer} &buff
  */
 void HttpResponse::addHeader_(Buffer &buff) {
     /*组装信息，将信息送入写缓冲区中*/
@@ -191,10 +179,9 @@ void HttpResponse::addHeader_(Buffer &buff) {
     buff.append("Content-type: " + getFileType_() + "\r\n");
 }
 
-/*
- * 将返回信息中的 响应正文内容（服务器上的文件） 映射到内存中
- * 采用的是将文件映射到内存中一块区域这种方式，比较快节省资源
- * 此函数负责将文件映射到内存中
+/**
+ * @description: 将返回信息中的 响应正文内容（服务器上的文件） 映射到内存中，同时向返回头添加content字段
+ * @param {Buffer} &buff
  */
 void HttpResponse::addContent_(Buffer &buff) {
     /*根据文件名以只读方式打开文件*/
@@ -222,13 +209,16 @@ void HttpResponse::addContent_(Buffer &buff) {
     buff.append("Content-length: " + std::to_string(mmFileStat_.st_size) + "\r\n\r\n");
 }
 
-/*
- * 拼装返回的头部以及需要发送的文件
+/**
+ * @description: 拼装返回的头部以及需要发送的文件到写缓冲区
+ * @param {Buffer} &buff
+ * @return {*}
  */
 void HttpResponse::makeResponse(Buffer &buff) {
     /*判断请求的资源文件*/
     if (stat((srcDir_ + path_).data(), &mmFileStat_) < 0 || S_ISDIR(mmFileStat_.st_mode)) {
-        /*stat用来将参数file_name所指的文件状态, 复制到参数mmFileStat_所指的结构中。若执行失败，即返回值为-1 或 路径为目录则设置状态码code_为404*/
+        /*stat用来将参数file_name所指的文件状态, 复制到参数mmFileStat_所指的结构中。
+        若执行失败，即返回值为-1 或 路径为目录则设置状态码code_为404*/
         code_ = 404;
     } else if (!(mmFileStat_.st_mode & S_IROTH)) {
         /*如果没有读取权限则置状态码code_为403*/

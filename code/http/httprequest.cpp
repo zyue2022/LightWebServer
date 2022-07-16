@@ -1,39 +1,27 @@
 #include "httprequest.h"
 
-/*
- * 保存默认界面名字的静态变量，所有对以下界面的请求都会加上 .html 后缀
- */
 const std::unordered_set<std::string> HttpRequest::DEFAULT_HTML{
     "/index", "/register", "/login", "/welcome", "/video", "/picture",
 };
 
-/*
- * 静态变量，保存默认的HTML标签
- */
 const std::unordered_map<std::string, int> HttpRequest::DEFAULT_HTML_TAG{{"/register.html", 0},
                                                                          {"/login.html", 1}};
 
-/*
- * 构造函数中初始化
- */
 HttpRequest::HttpRequest() { init(); }
 
-/*
- * 初始化相关变量
+/**
+ * @description: 初始化相关变量，由构造函数调用
  */
 void HttpRequest::init() {
-    /*所有变量清空*/
     method_ = path_ = version_ = body_ = "";
+
     /*状态重置到解析请求行状态*/
     state_ = REQUEST_LINE;
-    /*清空以下变量*/
+
     header_.clear();
     post_.clear();
 }
 
-/*
- * 返回客户端是否有长连接请求
- */
 bool HttpRequest::isKeepAlive() const {
     if (header_.count("Connection") == 1) {
         return header_.find("Connection")->second == "keep-alive" && version_ == "1.1";
@@ -41,8 +29,10 @@ bool HttpRequest::isKeepAlive() const {
     return false;
 }
 
-/*
- * 将16进制数转为十进制数
+/**
+ * @description: 将16进制数转为十进制数
+ * @param {char} ch
+ * @return {int}
  */
 int HttpRequest::convertHex(char ch) {
     if (ch >= 'A' && ch <= 'F') {
@@ -54,28 +44,18 @@ int HttpRequest::convertHex(char ch) {
     return ch - '0';
 }
 
-/*
- * 返回解析请求行得到的state_变量
- */
 HttpRequest::PARSE_STATE HttpRequest::state() const { return state_; }
 
-/*
- * 返回解析请求行得到的path_变量
- */
 std::string HttpRequest::path() const { return path_; }
 
-/*
- * 返回解析请求行得到的method_变量
- */
 std::string HttpRequest::method() const { return method_; }
 
-/*
- * 返回解析请求行得到的version_变量
- */
 std::string HttpRequest::version() const { return version_; }
 
-/*
- * 返回请求头中指定键对应的数据
+/**
+ * @description: 返回请求头中指定键对应的数据
+ * @param {string} &key
+ * @return {string}
  */
 std::string HttpRequest::getPost(const std::string &key) const {
     assert(key != "");
@@ -85,26 +65,21 @@ std::string HttpRequest::getPost(const std::string &key) const {
     return "";
 }
 
-/*
- * 返回请求头中指定键对应的数据，重载版本
- */
-std::string HttpRequest::getPost(const char *key) const {
-    assert(key != nullptr);
-    if (post_.count(key) == 1) {
-        return post_.find(key)->second;
-    }
-    return "";
-}
-
-/*
- * 使用正则库解析请求行
- * GET请求的请求行示例
- * GET /index.html HTTP/1.1
- * POST请求的请求行示例
- * POST / HTTP1.1
+/**
+ * @description: 解析请求行,使用正则库
+ *              - GET请求的请求行示例:  GET /index.html HTTP/1.1
+ *              - POST请求的请求行示例: POST / HTTP1.1
+ *              - 正则示例：
+ *                      - ^表示行开始，$表示行尾，[^ ]表示匹配非空格,
+ *                      - (expression)分组，匹配括号里的整个表达式，()括住的代表我们需要的字符串，
+ *                      - [^abc]是否定字符集，匹配任何不在集合中的字符，
+ *                      - .	是匹配除换行符以外的任何单个字符
+ *                      - ? 是匹配前面的表达式0个或1个
+ *                      - 匹配结果送入submatch中；
+ * @param {string} &line
  */
 bool HttpRequest::parseRequestLine_(const std::string &line) {
-    /*指定匹配规则，^表示行开始，$表示行尾，[^ ]表示匹配非空格,括号()括住的代表我们需要得到的字符串，最后会送入submatch中*/
+    /*指定匹配规则，*/
     std::regex  pattern("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");
     std::smatch subMatch;
     if (std::regex_match(line, subMatch, pattern)) {
@@ -120,31 +95,30 @@ bool HttpRequest::parseRequestLine_(const std::string &line) {
     return false;
 }
 
-/*
- * 使用正则库解析请求头
- * 请求头由如下键值对组成，由 : 分割键值对
- * Host: 192.168.30.128:10000
+/**
+ * @description: 使用正则库解析请求头
+ *              - 请求头键值对示例：
+ *                          - Host: 192.168.30.128:10000
+ * @param {string} &line
  */
 void HttpRequest::parseHeader_(const std::string &line) {
-    /*指定匹配规则，^表示行开始，[^ ]表示匹配非空格，括号()括住的代表我们需要得到的字符串，最后会送入submatch中*/
-    // [^abc]否定字符集。匹配任何不在集合中的字符。
-    // .	匹配除换行符以外的任何单个字符
-    // (expression)	分组。匹配括号里的整个表达式
-    // ?	匹配前面的表达式0个或1个。即表示可选项。
     std::regex  pattern("^([^:]*): ?(.*)$");
     std::smatch subMatch;
     if (std::regex_match(line, subMatch, pattern)) {
         /*将解析出来的信息以键值对的形式存入unordered_map里面*/
         header_[subMatch[1]] = subMatch[2];
     } else {
-        /*如果没有匹配到，说明进入到了请求头后的空行，若是post请求，则将state_设置为BODY进入解析请求体的流程*/
-        /*调用此函数的函数通过可读的数据量判断是POST还是GET请求，若是GET请求则直接将state_设置为FINISH状态结束解析，这里后面需要改一下逻辑，*/
+        /*如果没有匹配到，说明进入到了请求头后的空行，
+        若是post请求，则将state_设置为BODY进入解析请求体的流程*/
+        /*调用此函数的函数通过可读的数据量判断是POST还是GET请求，
+        若是GET请求则直接将state_设置为FINISH状态结束解析，这里后面需要改一下逻辑，*/
         state_ = BODY;
     }
 }
 
-/*
- * 解析请求体
+/**
+ * @description: 解析请求体
+ * @param {string} &line
  */
 bool HttpRequest::parseBody_(const std::string &line) {
     /*将line赋值给类变量body_*/
@@ -160,20 +134,19 @@ bool HttpRequest::parseBody_(const std::string &line) {
     return true;
 }
 
-/*
- * 解析请求体中的内容
- * 目前只能解析application/x-www-form-urlencoded此种格式，以后可以根据需要添加格式，比如json
- * 如果请求方式时POST Content-Type为application/x-www-form-urlencoded就可以解析，表示以键值对的数据格式提交
- * 使用post的形式进行登录信息的传输
+/**
+ * @description:  按行解析请求体
+ *              - 目前只能解析application/x-www-form-urlencoded此种格式，表示以键值对的数据格式提交
+ *              - 如果请求方式时POST Content-Type为application/x-www-form-urlencoded就可以解析
+ *              - 以后可以根据需要添加格式，比如json
  */
 bool HttpRequest::parsePost_() {
-    long unsigned int bodyLen = stoi(header_["Content-Length"]);
+    size_t bodyLen = stoi(header_["Content-Length"]);
     if (body_.size() < bodyLen) {
         /*判断post数据是否接受完整，未接收完则返回false，表示继续请求*/
         return false;
     }
 
-    /*以后可以添加其他种类的Content-Type的支持*/
     if (method_ == "POST" && header_["Content-Type"] == "application/x-www-form-urlencoded") {
         /*将请求体中的内容解析到post_变量中*/
         parseFromUrlencoded_();
@@ -198,8 +171,8 @@ bool HttpRequest::parsePost_() {
     return true;
 }
 
-/*
- * 从请求体中的application/x-www-form-urlencoded类型信息提取信息
+/**
+ * @description: 从请求体中的application/x-www-form-urlencoded类型消息提取信息
  */
 void HttpRequest::parseFromUrlencoded_() {
     if (body_.size() == 0) return;
@@ -225,7 +198,6 @@ void HttpRequest::parseFromUrlencoded_() {
             case '%':
                 /*浏览器会将非字母字母字符，encode成百分号+其ASCII码的十六进制*/
                 /*%后面跟的是十六进制码,将十六进制转化为10进制*/
-                /*作者这里的实现是有一点问题，这里应该是转成ASCII码对应的字符的，而不是转换成对应的十进制字符，况且转化后的十进制也只能局限在0-99范围内*/
                 num = convertHex(body_[i + 1]) * 16 + convertHex(body_[i + 2]);
                 /*根据ascii码转换为字符*/
                 temp += static_cast<char>(num);
@@ -233,7 +205,7 @@ void HttpRequest::parseFromUrlencoded_() {
                 i += 2;
                 break;
             case '&':
-                /*&号前是val*/
+                /*&号前是value*/
                 value = temp;
                 temp.clear();
                 /*添加键值对*/
@@ -252,8 +224,12 @@ void HttpRequest::parseFromUrlencoded_() {
     }
 }
 
-/*
- * 验证用户
+/**
+ * @description: 根据注册或登录验证用户
+ * @param {string} &name
+ * @param {string} &pwd
+ * @param {bool} isLogin
+ * @return {bool}
  */
 bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, bool isLogin) {
     /*密码或用户名为空，直接错误*/
@@ -263,35 +239,32 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, bo
     LOG_INFO("Verify name:%s pwd:%s", name.c_str(), pwd.c_str());
 
     /*获取一个sql连接*/
-    MYSQL *sql;
-    /*RAII*/
+    MYSQL      *sql;
     SqlConnRAII sqlConnRaii(&sql, SqlConnPool::instance());
     assert(sql);
 
-    /*初始化一系列相关变量*/
-    bool         flag       = false;
-    char         order[256] = {0};
-    MYSQL_RES   *res        = nullptr;
+    /*初始化一系列数据库连接相关变量*/
+    bool       flag       = false;
+    char       order[256] = {0};
+    MYSQL_RES *res        = nullptr;
 
     /*如果是注册，那么将flag置为true*/
     if (!isLogin) {
         flag = true;
     }
-    /* 查询用户及密码 */
+
+    /* 查询用户及密码的语句 */
     snprintf(order, 256, "SELECT username, password FROM user WHERE username='%s' LIMIT 1",
              name.c_str());
     LOG_DEBUG("%s", order);
 
-    if (mysql_query(sql, order)) {
-        mysql_free_result(res);
-        return false;
-    }
-    /*从表中检索完整的结果集*/
+    /* mysql_query执行由“Null终结的字符串”查询指向的SQL查询，查询成功，返回0。如果出现错误，返回非0值 */
+    if (mysql_query(sql, order)) return false;
+
+    /* mysql_store_result()将查询的全部结果读取到客户端，分配1个MYSQL_RES结构，并将结果置于该结构中。
+    如果查询未返回结果集，mysql_store_result()将返回Null指针（例如，如果查询是INSERT语句）。
+    如果读取结果集失败，mysql_store_result()还会返回Null指针 */
     res = mysql_store_result(sql);
-    /*返回结果集中的列数*/
-    mysql_num_fields(res);
-    /*返回所有字段结构的数组*/
-    mysql_fetch_fields(res);
 
     /*从结果集中获取下一行*/
     while (MYSQL_ROW row = mysql_fetch_row(res)) {
@@ -310,6 +283,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, bo
             LOG_DEBUG("user used!");
         }
     }
+    /* 完成对结果集的操作后，必须调用mysql_free_result()释放结果集使用的内存。释放完成后，不要尝试访问结果集。 */
     mysql_free_result(res);
 
     /* 注册行为 且 用户名未被使用*/
@@ -331,9 +305,8 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, bo
     return flag;
 }
 
-/*
- * 将客户端传来的path变量添加完整，以目录结束的路径添加上默认页面
- * 在DEFAULT_HTML中的界面添加上文件后缀名
+/**
+ * @description: 将客户端传来的path变量添加完整，以目录结束的路径添加上默认页面
  */
 void HttpRequest::parsePath_() {
     if (path_ == "/") {  // 浏览器加上 /index.html 时会被自动转化为 /
@@ -348,14 +321,16 @@ void HttpRequest::parsePath_() {
     }
 }
 
-/*
- * 解析收到的http请求内容
- * 作者实现有点问题，需要改进，可以按照tinywebserver的解析方式进行改进
+/**
+ * @description: 有限状态机、解析读缓冲区的http请求内容
+ * @param {Buffer} &buff
  */
 HttpRequest::HTTP_CODE HttpRequest::parse(Buffer &buff) {
     /*在请求头的每一行结尾都有下面这两个字符*/
     const char CRLF[] = "\r\n";
-    /*若没有内容可以被读取，直接返回false，这里是有问题的，应该返回一个NO_REQUEST状态，调用函数接受到该状态之后重新修改EPOLL事件注册一个EPOLLIN事件*/
+
+    /*若没有内容可以被读取，直接返回false，这里是有问题的，应该返回一个NO_REQUEST状态，
+    调用函数接受到该状态之后重新修改EPOLL事件注册一个EPOLLIN事件*/
     if (buff.readableBytes() <= 0) {
         return NO_REQUEST;
     }
@@ -377,19 +352,15 @@ HttpRequest::HTTP_CODE HttpRequest::parse(Buffer &buff) {
         switch (state_) {
             case REQUEST_LINE:
                 /*首先解析请求行*/
-                if (!parseRequestLine_(line)) {
-                    /*如果失败的话，false*/
-                    return BAD_REQUEST;
-                }
-                /*将客户端传来的path变量添加完整,目录加上默认页面，没有后缀的指定文件加上后缀*/
+                if (!parseRequestLine_(line)) return BAD_REQUEST;
+                /*将客户端传来的path变量添加完整*/
                 parsePath_();
                 break;
             case HEADER:
                 /*解析完请求行之后，state_变量会被置为HEADERS，所以会跳到此处处理请求头部*/
                 parseHeader_(line);
-                /*这里逻辑有点问题，因为可能会存在请求未接受完整的情况，所以后面可以改成根据method判断是否跳转到FINISH阶段*/
-                /*因为在ParseHeader_中请求头解析到空行时会将state_置为body，所以这里的判断条件可以改为 if(state_==body && method_==GET){state_=FINISH;}*/
-                /*这样就可以实验GET与POST的对应处理*/
+                /*可能会存在请求未接受完整的情况，所以后面可以改成根据method判断是否跳转到FINISH阶段*/
+                /*因为在ParseHeader_中请求头解析到空行时会将state_置为body，这样就可以分别对GET与POST的对应处理*/
                 if (state_ == BODY && method_ == "GET") {
                     state_ = FINISH;
                     buff.clearAll();

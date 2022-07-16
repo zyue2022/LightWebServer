@@ -1,7 +1,7 @@
 /*
  * @Description  : HTTP连接类
  * @Date         : 2022-07-16 01:14:05
- * @LastEditTime : 2022-07-16 23:55:47
+ * @LastEditTime : 2022-07-17 00:21:01
  */
 #ifndef MY_WEBSERVER_HTTPCONN_H
 #define MY_WEBSERVER_HTTPCONN_H
@@ -21,9 +21,10 @@
 class HttpConn {
 public:
     // 静态
-    static bool             isET;       // 指示处理客户端连接的工作模式
-    static char            *srcDir;     // 资源文件目录
-    static std::atomic<int> userCount;  // 指示用户连接个数
+    static bool  isET;    // 触发模式
+    static char *srcDir;  // 资源文件目录
+
+    static std::atomic<int> userCount;  // 用户连接个数
 
 private:
     int         fd_;       // socket对应的文件描述符
