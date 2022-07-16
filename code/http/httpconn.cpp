@@ -1,16 +1,16 @@
 #include "httpconn.h"
 
-const char      *HttpConn::srcDir;
-std::atomic<int> HttpConn::userCount;
-bool             HttpConn::isET;
+char *HttpConn::srcDir = nullptr;
+bool  HttpConn::isET   = false;
 
-/*
- * 构造函数中赋初值
- */
+std::atomic<int> HttpConn::userCount;
+
 HttpConn::HttpConn() : fd_(-1), isClose_(true) { addr_ = {0}; }
 
-/*
- * 根据文件描述符与socket地址初始化httpconn类实例
+/**
+ * @description: 初始化httpconn类实例
+ * @param {int} sockfd
+ * @param {sockaddr_in} &addr
  */
 void HttpConn::init(int sockfd, const sockaddr_in &addr) {
     assert(sockfd > 0);
@@ -25,13 +25,11 @@ void HttpConn::init(int sockfd, const sockaddr_in &addr) {
     LOG_INFO("Client[%d](%s:%d) in, userCount: %d", sockfd, getIP(), getPort(), (int)userCount);
 }
 
-/*
- * 为了确保资源被释放，所以在析构函数里调用close释放所有资源
- */
 HttpConn::~HttpConn() { closeConn(); }
 
-/*
- * 关闭该socket的连接，取消文件映射，关闭文件描述符
+/**
+ * @description: 关闭该socket的连接，取消文件映射，关闭文件描述符
+ * 被析构函数调用
  */
 void HttpConn::closeConn() {
     response_.unmapFile();
@@ -43,38 +41,19 @@ void HttpConn::closeConn() {
     }
 }
 
-/*
- * 返回还需要写多少字节的数据
- */
-int HttpConn::toWriteBytes() { return iov_[0].iov_len + iov_[1].iov_len; }
-
-/*
- * 返回连接状态是否为长连接
- */
 bool HttpConn::isKeepAlive() const { return request_.isKeepAlive(); }
 
-/*
- * 获取该socket对应的文件描述符的函数
- */
 int HttpConn::getFd() const { return fd_; }
 
-/*
- * 获取该socket对应的地址的函数
- */
 sockaddr_in HttpConn::getAddr() const { return addr_; }
 
-/*
- * 获取该socket对应的IP地址的函数
- */
 const char *HttpConn::getIP() const { return inet_ntoa(addr_.sin_addr); }
 
-/*
- * 获取该socket对应的端口的函数
- */
 int HttpConn::getPort() const { return addr_.sin_port; }
 
-/*
- * 读取socket中的数据，保存到读缓冲区中
+/**
+ * @description: 读取socket中的数据，保存到读缓冲区中，并设置可能的错误号
+ * @param {int} *saveErrno
  */
 ssize_t HttpConn::read(int *saveErrno) {
     ssize_t len = -1;
@@ -89,26 +68,31 @@ ssize_t HttpConn::read(int *saveErrno) {
     return len;
 }
 
-/*
- * 使用writev方法将数据发送到指定socket中
- * writev函数用于在一次函数调用中写多个非连续缓冲区，有时也将这该函数称为聚集写
+/**
+ * @description: 返回还需要写多少字节的数据
+ */
+int HttpConn::bytesNeedWrite() { return iov_[0].iov_len + iov_[1].iov_len; }
+
+/**
+ * @description: 使用聚集写writev方法将数据发送到指定socket中，并设置可能的错误号
+ * @param {int} *saveErrno
+ * @return {*}
  */
 ssize_t HttpConn::write(int *saveErrno) {
     ssize_t len = -1;
     do {
-        /*若是缓冲区满了，errno会返回EAGAIN，这时需要重新注册EPOLL上的EPOLLOUT事件*/
         len = writev(fd_, iov_, iovCnt_);
         if (len <= 0) {
-            /*记录信号返回给调用函数*/
             *saveErrno = errno;
+            /*若errno返回EAGAIN，需要重新注册EPOLL上的EPOLLOUT事件*/
             break;
         }
 
-        if (iov_[0].iov_len + iov_[1].iov_len == 0) {
-            /*两个传输位置长度都为0，表示传输结束 */
+        if (bytesNeedWrite() == 0) {
+            /* 每次聚集写后都判断是否还有数据需要发送，没有就退出 */
             break;
         } else if (static_cast<size_t>(len) > iov_[0].iov_len) {
-            /*如果发送的数据长度大于iov_[0].iov_len，说明第一块区域的数据是发送完毕，再根据多发送了多少调整iov_[1]的取值*/
+            /*说明第一块区域的数据是发送完毕，再根据多发送了多少调整iov_[1]的取值*/
             iov_[1].iov_base = (uint8_t *)iov_[1].iov_base + (len - iov_[0].iov_len);
             iov_[1].iov_len -= (len - iov_[0].iov_len);
             if (iov_[0].iov_len) {
@@ -123,10 +107,7 @@ ssize_t HttpConn::write(int *saveErrno) {
             /*回收对应长度的空间*/
             writeBuff_.hasRead(len);
         }
-        /*任需发送的数据大于10240的情况下会继续发送 或 若在LT模式下，只会发送一次，ET模式下会一直发送，直到完毕*/
-        /*这里有点问题，如果是LT模式，且需要写的数据小于等于10240，那么连接会被之间关闭，这里可以选择在调用函数处修改判断条件*/
-        /*或者直接将这里改为ToWriteBytes()>0*/
-    } while (toWriteBytes() > 0);
+    } while (bytesNeedWrite() > 0);
 
     return len;
 }
@@ -166,7 +147,7 @@ bool HttpConn::process() {
         /*其他情况表示解析失败，则返回400错误*/
         response_.init(srcDir, request_.path(), false, 400);
     }
-    
+
     /*httpresponse负责拼装返回的头部以及需要发送的文件*/
     response_.makeResponse(writeBuff_);
     /*响应头，将写缓冲区赋值给iov_，后面使用writev函数发送至客户端*/
@@ -181,7 +162,7 @@ bool HttpConn::process() {
         iov_[1].iov_len  = response_.fileLen();
         iovCnt_          = 2;
     }
-    LOG_DEBUG("filesize: %d, %d to %d", response_.fileLen(), iovCnt_, toWriteBytes());
+    LOG_DEBUG("filesize: %d, %d to %d", response_.fileLen(), iovCnt_, bytesNeedWrite());
 
     return true;
 }

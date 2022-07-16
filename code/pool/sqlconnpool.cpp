@@ -1,17 +1,9 @@
 #include "sqlconnpool.h"
 
-/*
- * 私有的构造函数，单例模式防止类外创建SqlConnPool实例
- */
-SqlConnPool::SqlConnPool() {}
-
-/*
- * 析构时释放所有资源
- */
 SqlConnPool::~SqlConnPool() { closePool(); }
 
-/*
- * 关闭数据库连接池
+/**
+ * @description: 关闭数据库连接池，被析构函数调用
  */
 void SqlConnPool::closePool() {
     std::lock_guard<std::mutex> locker(mtx_);
@@ -23,17 +15,16 @@ void SqlConnPool::closePool() {
     mysql_library_end();
 }
 
-/*
- * 静态方法，方法内静态初始化可以保证线程安全，调用该函数返回这一个静态实例的引用
+/**
+ * @description: 懒汉单例模式，局部静态变量
  */
 SqlConnPool *SqlConnPool::instance() {
-    // 局部静态变量
     static SqlConnPool connPool;
     return &connPool;
 }
 
-/*
- * 初始化数据库连接池
+/**
+ * @description: 初始化数据库连接池
  */
 void SqlConnPool::init(const char *host, int port, const char *user, const char *pwd,
                        const char *dbName, int connSize) {
@@ -59,8 +50,8 @@ void SqlConnPool::init(const char *host, int port, const char *user, const char 
     sem_init(&semId_, 0, MAX_CONN_);
 }
 
-/*
- * 获得数据库连接池中的一个连接
+/**
+ * @description: 取出数据库连接池中的一个连接
  */
 MYSQL *SqlConnPool::getConn() {
     MYSQL *sql = nullptr;
@@ -82,8 +73,9 @@ MYSQL *SqlConnPool::getConn() {
     return sql;
 }
 
-/*
- * 释放一个数据库连接，重新将连接入池
+/**
+ * @description: 释放一个数据库连接，重新将连接入池
+ * @param {MYSQL} *sql
  */
 void SqlConnPool::freeConn(MYSQL *sql) {
     assert(sql);
@@ -93,8 +85,8 @@ void SqlConnPool::freeConn(MYSQL *sql) {
     sem_post(&semId_);
 }
 
-/*
- * 获取空闲连接的数量
+/**
+ * @description: 获取可用连接的数量
  */
 int SqlConnPool::getFreeConnCount() {
     std::lock_guard<std::mutex> locker(mtx_);

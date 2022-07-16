@@ -1,21 +1,23 @@
+/*
+ * @Description  : RAII机制封装MySQL连接类，用于从连接池取出连接
+ * @Date         : 2022-07-16 01:14:06
+ * @LastEditTime : 2022-07-16 23:39:30
+ */
 #ifndef MY_WEBSERVER_SQLCONNRAII_H
 #define MY_WEBSERVER_SQLCONNRAII_H
 
 #include "sqlconnpool.h"
 
-/*
- * 资源在对象构造初始化 资源在对象析构时释放
- */
 class SqlConnRAII {
 private:
-    MYSQL       *sql_;       // 一个数据库连接
+    MYSQL       *sql_;       // 数据库连接
     SqlConnPool *connpool_;  // 连接池
 
 public:
-    /*
-     * 因为这里需要修改指针的值，所以需要拆入二级指针，其实这里可以用指针的引用接收，这样只需要传入指针即可
-     * 构造函数中获取连接
-     */
+    /**
+     * @description: 构造函数中获取连接
+     * 因为这里需要修改指针的值，所以需要拆入二级指针，也可以用指针的引用
+     */    
     SqlConnRAII(MYSQL **sql, SqlConnPool *connpool) {
         assert(connpool);
         *sql      = connpool->getConn();
@@ -23,9 +25,9 @@ public:
         connpool_ = connpool;
     }
 
-    /*
-     * 析构函数中释放
-     */
+    /**
+     * @description:  析构函数中自动释放
+     */    
     ~SqlConnRAII() {
         if (sql_) {
             connpool_->freeConn(sql_);

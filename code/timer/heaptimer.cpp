@@ -1,20 +1,16 @@
 #include "heaptimer.h"
 
-/*
- * 构造函数中预申请一些空间
- */
 HeapTimer::HeapTimer() { heap_.reserve(64); }
 
-/*
- * 析构函数中清空空间
- */
 HeapTimer::~HeapTimer() {
     ref_.clear();
     heap_.clear();
 }
 
-/*
- * 交换堆中两个节点
+/**
+ * @description: 交换两个节点
+ * @param {size_t} i
+ * @param {size_t} j
  */
 void HeapTimer::swapNode_(size_t i, size_t j) {
     assert(i >= 0 && i < heap_.size());
@@ -24,8 +20,9 @@ void HeapTimer::swapNode_(size_t i, size_t j) {
     ref_[heap_[j].fd] = j;
 }
 
-/*
- * 调整堆中元素
+/**
+ * @description: 上浮
+ * @param {size_t} i
  */
 void HeapTimer::siftup_(size_t i) {
     assert(i >= 0 && i < heap_.size());
@@ -40,8 +37,10 @@ void HeapTimer::siftup_(size_t i) {
     }
 }
 
-/*
- * 调整堆中元素
+/**
+ * @description: 下沉
+ * @param {size_t} index
+ * @param {size_t} n
  */
 bool HeapTimer::siftdown_(size_t index, size_t n) {
     assert(index >= 0 && index < heap_.size());
@@ -58,8 +57,11 @@ bool HeapTimer::siftdown_(size_t index, size_t n) {
     return i > index;
 }
 
-/*
- * 为指定文件描述符添加一个定时器到堆中
+/**
+ * @description: 添加一个节点到定时器堆
+ * @param {int} fd
+ * @param {int} timeout
+ * @param {TimeoutCallBack&} cb
  */
 void HeapTimer::add(int fd, int timeout, const TimeoutCallBack& cb) {
     assert(fd >= 0);
@@ -81,15 +83,16 @@ void HeapTimer::add(int fd, int timeout, const TimeoutCallBack& cb) {
     }
 }
 
-/*
- * 删除指定节点
+/**
+ * @description: 删除指定节点,并没有触发它的回调函数
+ * @param {size_t} index
  */
 void HeapTimer::del_(size_t index) {
     /* 删除指定位置的结点 */
     assert(!heap_.empty() && index >= 0 && index < heap_.size());
     /* 将要删除的结点换到队尾，然后调整堆 */
     size_t i = index;
-    size_t n = heap_.size() - 1; // 注意此处 有个 减1
+    size_t n = heap_.size() - 1;  // 注意此处 有个 减1
     assert(i <= n);
     if (i < n) {
         swapNode_(i, n);
@@ -103,8 +106,10 @@ void HeapTimer::del_(size_t index) {
     heap_.pop_back();
 }
 
-/*
- * 调整当前节点的过期时间为 当前时间+timeout
+/**
+ * @description: 调整当前节点的过期时间为 当前时间+timeout
+ * @param {int} fd
+ * @param {int} timeout
  */
 void HeapTimer::adjust(int fd, int timeout) {
     /* 调整指定id的结点 */
@@ -114,8 +119,8 @@ void HeapTimer::adjust(int fd, int timeout) {
     siftdown_(ref_[fd], heap_.size());
 }
 
-/*
- * 删除队中所有的超时节点
+/**
+ * @description: 删除所有的超时节点，并触发回调函数
  */
 void HeapTimer::tick() {
     /* 清除超时结点 */
@@ -132,19 +137,18 @@ void HeapTimer::tick() {
     }
 }
 
-/*
- * 删除第一个节点
+/**
+ * @description: 删除堆顶节点
  */
 void HeapTimer::pop() {
     assert(!heap_.empty());
     del_(0);
 }
 
-/*
- * 删除所有超时节点，返回最近一个超时节点的超时时间
+/**
+ * @description: 删除所有超时节点，返回删除后堆顶节点的超时时间
  */
 int HeapTimer::getNextTick() {
-    /*删除超时节点*/
     tick();
     int res = -1;
     if (!heap_.empty()) {

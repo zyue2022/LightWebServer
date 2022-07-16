@@ -1,3 +1,8 @@
+/*
+ * @Description  : MySQL连接池类，单例模式，线程同步
+ * @Date         : 2022-07-16 01:14:06
+ * @LastEditTime : 2022-07-16 23:42:26
+ */
 #ifndef MY_WEBSERVER_SQLCONNPOLL_H
 #define MY_WEBSERVER_SQLCONNPOLL_H
 
@@ -11,9 +16,6 @@
 
 #include "../logsys/log.h"
 
-/*
- * 单例模式
- */
 class SqlConnPool {
 private:
     int MAX_CONN_;  // 最大连接数量
@@ -24,7 +26,7 @@ private:
     std::queue<MYSQL *> connQue_;  // 连接队列
 
 private:
-    SqlConnPool();
+    SqlConnPool() = default;
     ~SqlConnPool();
 
 public:
@@ -34,8 +36,7 @@ public:
               int connSize);
 
     MYSQL *getConn();
-
-    void freeConn(MYSQL *sql);
+    void   freeConn(MYSQL *sql);
 
     int getFreeConnCount();
 
