@@ -13,14 +13,14 @@
 
 class HttpResponse {
 private:
-    char       *mmFile_;      // 发送文件
-    struct stat mmFileStat_;  // 发送文件的信息
+    int  code_;         // 返回码
+    bool isKeepAlive_;  // 是否保持长连接
 
     std::string path_;    // 文件路径
     std::string srcDir_;  // 项目根目录
 
-    int  code_;         // 返回码
-    bool isKeepAlive_;  // 是否保持长连接
+    char       *mmFile_;      // 发送文件
+    struct stat mmFileStat_;  // 发送文件的信息
 
     static const std::unordered_map<std::string, std::string> SUFFIX_TYPE;  // 返回类型键值对
 

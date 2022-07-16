@@ -185,3 +185,359 @@
 2022-07-16 15:30:22.955374 [info]:  Client[20] quit!
 2022-07-16 15:30:22.956761 [info]:  Client[20](192.168.30.1:53479) quit, userCount: 0
 2022-07-16 15:30:55.261793 [info]:  Client[25] quit!
+2022-07-16 15:55:29.337283 [info]:  =============Server init================
+2022-07-16 15:55:29.337304 [info]:  Port: 10000,OpenLinger: false
+2022-07-16 15:55:29.337310 [info]:  Listen Mode: ET, Conn Mode: ET
+2022-07-16 15:55:29.337312 [info]:  Log level: 0
+2022-07-16 15:55:29.337315 [info]:  srcDir: /home/zyue/lesson/newserver/resources/
+2022-07-16 15:55:29.337317 [info]:  SqlConnPool num: 12, ThreadPool num: 6
+2022-07-16 15:55:29.337319 [info]:  ================Server start================
+2022-07-16 15:55:36.875943 [info]:  Client[18](192.168.30.1:38654) in, userCount: 1
+2022-07-16 15:55:36.876412 [info]:  Client[18] in!
+2022-07-16 15:55:36.876471 [info]:  Client[19](192.168.30.1:39934) in, userCount: 2
+2022-07-16 15:55:36.876500 [info]:  Client[19] in!
+2022-07-16 15:55:36.887246 [debug]: request path /picture.html
+2022-07-16 15:55:36.887329 [debug]: file path /home/zyue/lesson/newserver/resources//picture.html
+2022-07-16 15:55:36.887768 [debug]: filesize: 3960, 2 to 4082
+2022-07-16 15:55:36.963921 [info]:  Client[20](192.168.30.1:41726) in, userCount: 3
+2022-07-16 15:55:36.964107 [info]:  Client[20] in!
+2022-07-16 15:55:36.964149 [info]:  Client[21](192.168.30.1:41982) in, userCount: 4
+2022-07-16 15:55:36.964160 [info]:  Client[21] in!
+2022-07-16 15:55:36.964178 [info]:  Client[22](192.168.30.1:42238) in, userCount: 5
+2022-07-16 15:55:36.964187 [info]:  Client[22] in!
+2022-07-16 15:55:36.965514 [debug]: request path /css/animate.css
+2022-07-16 15:55:36.965740 [debug]: file path /home/zyue/lesson/newserver/resources//css/animate.css
+2022-07-16 15:55:36.967195 [debug]: request path /css/style.css
+2022-07-16 15:55:36.967364 [debug]: filesize: 72922, 2 to 73045
+2022-07-16 15:55:36.967436 [debug]: file path /home/zyue/lesson/newserver/resources//css/style.css
+2022-07-16 15:55:36.968378 [debug]: request path /css/font-awesome.min.css
+2022-07-16 15:55:36.968414 [debug]: file path /home/zyue/lesson/newserver/resources//css/font-awesome.min.css
+2022-07-16 15:55:36.968620 [debug]: filesize: 27392, 2 to 27515
+2022-07-16 15:55:36.968988 [debug]: request path /css/magnific-popup.css
+2022-07-16 15:55:36.969075 [debug]: file path /home/zyue/lesson/newserver/resources//css/magnific-popup.css
+2022-07-16 15:55:36.969251 [debug]: filesize: 6951, 2 to 7073
+2022-07-16 15:55:36.969276 [debug]: request path /css/bootstrap.min.css
+2022-07-16 15:55:36.969373 [debug]: file path /home/zyue/lesson/newserver/resources//css/bootstrap.min.css
+2022-07-16 15:55:36.970397 [debug]: filesize: 9807, 2 to 9929
+2022-07-16 15:55:36.971544 [debug]: filesize: 121260, 2 to 121384
+2022-07-16 15:55:37.094710 [debug]: request path /js/jquery.js
+2022-07-16 15:55:37.095627 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.js
+2022-07-16 15:55:37.096220 [debug]: request path /js/bootstrap.min.js
+2022-07-16 15:55:37.097042 [debug]: file path /home/zyue/lesson/newserver/resources//js/bootstrap.min.js
+2022-07-16 15:55:37.098220 [debug]: filesize: 85658, 2 to 85788
+2022-07-16 15:55:37.101658 [debug]: request path /js/smoothscroll.js
+2022-07-16 15:55:37.101920 [info]:  Client[23](192.168.30.1:42494) in, userCount: 6
+2022-07-16 15:55:37.101972 [info]:  Client[23] in!
+2022-07-16 15:55:37.103648 [debug]: file path /home/zyue/lesson/newserver/resources//js/smoothscroll.js
+2022-07-16 15:55:37.104356 [debug]: request path /js/jquery.magnific-popup.min.js
+2022-07-16 15:55:37.104403 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.magnific-popup.min.js
+2022-07-16 15:55:37.104491 [debug]: filesize: 4474, 2 to 4603
+2022-07-16 15:55:37.104922 [debug]: request path /js/magnific-popup-options.js
+2022-07-16 15:55:37.104982 [debug]: file path /home/zyue/lesson/newserver/resources//js/magnific-popup-options.js
+2022-07-16 15:55:37.105046 [debug]: filesize: 20932, 2 to 21062
+2022-07-16 15:55:37.105460 [debug]: request path /js/wow.min.js
+2022-07-16 15:55:37.105487 [debug]: file path /home/zyue/lesson/newserver/resources//js/wow.min.js
+2022-07-16 15:55:37.105559 [debug]: filesize: 1069, 2 to 1198
+2022-07-16 15:55:37.105645 [debug]: filesize: 7082, 2 to 7211
+2022-07-16 15:55:37.105856 [debug]: filesize: 36868, 2 to 36998
+2022-07-16 15:55:37.108716 [debug]: request path /js/custom.js
+2022-07-16 15:55:37.108973 [debug]: file path /home/zyue/lesson/newserver/resources//js/custom.js
+2022-07-16 15:55:37.109423 [debug]: filesize: 1047, 2 to 1176
+2022-07-16 15:55:37.117373 [debug]: request path /images/instagram-image1.jpg
+2022-07-16 15:55:37.117502 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image1.jpg
+2022-07-16 15:55:37.117786 [debug]: request path /images/profile-image.jpg
+2022-07-16 15:55:37.117871 [debug]: file path /home/zyue/lesson/newserver/resources//images/profile-image.jpg
+2022-07-16 15:55:37.118528 [debug]: request path /images/instagram-image4.jpg
+2022-07-16 15:55:37.118577 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image4.jpg
+2022-07-16 15:55:37.118775 [debug]: request path /images/instagram-image3.jpg
+2022-07-16 15:55:37.118909 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image3.jpg
+2022-07-16 15:55:37.118924 [debug]: filesize: 75836, 2 to 75960
+2022-07-16 15:55:37.119625 [debug]: filesize: 59528, 2 to 59652
+2022-07-16 15:55:37.120537 [debug]: request path /images/instagram-image2.jpg
+2022-07-16 15:55:37.120704 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image2.jpg
+2022-07-16 15:55:37.121334 [debug]: filesize: 47176, 2 to 47300
+2022-07-16 15:55:37.121581 [debug]: filesize: 67313, 2 to 67437
+2022-07-16 15:55:37.121777 [debug]: filesize: 103418, 2 to 103543
+2022-07-16 15:55:37.122865 [debug]: request path /images/instagram-image5.jpg
+2022-07-16 15:55:37.123049 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image5.jpg
+2022-07-16 15:55:37.123488 [debug]: filesize: 49545, 2 to 49669
+2022-07-16 15:55:40.684804 [debug]: request path /video.html
+2022-07-16 15:55:40.684898 [debug]: file path /home/zyue/lesson/newserver/resources//video.html
+2022-07-16 15:55:40.685165 [debug]: filesize: 3347, 2 to 3469
+2022-07-16 15:55:40.739068 [debug]: request path /css/bootstrap.min.css
+2022-07-16 15:55:40.739544 [debug]: file path /home/zyue/lesson/newserver/resources//css/bootstrap.min.css
+2022-07-16 15:55:40.739675 [debug]: filesize: 121260, 2 to 121384
+2022-07-16 15:55:40.761502 [debug]: request path /css/animate.css
+2022-07-16 15:55:40.762235 [debug]: file path /home/zyue/lesson/newserver/resources//css/animate.css
+2022-07-16 15:55:40.762348 [debug]: filesize: 72922, 2 to 73045
+2022-07-16 15:55:40.768269 [debug]: request path /css/magnific-popup.css
+2022-07-16 15:55:40.769213 [debug]: request path /css/font-awesome.min.css
+2022-07-16 15:55:40.769361 [debug]: file path /home/zyue/lesson/newserver/resources//css/font-awesome.min.css
+2022-07-16 15:55:40.769398 [debug]: request path /css/style.css
+2022-07-16 15:55:40.769655 [debug]: filesize: 27392, 2 to 27515
+2022-07-16 15:55:40.769782 [debug]: file path /home/zyue/lesson/newserver/resources//css/magnific-popup.css
+2022-07-16 15:55:40.769856 [debug]: filesize: 6951, 2 to 7073
+2022-07-16 15:55:40.770182 [debug]: file path /home/zyue/lesson/newserver/resources//css/style.css
+2022-07-16 15:55:40.770291 [debug]: filesize: 9807, 2 to 9929
+2022-07-16 15:55:40.802895 [debug]: request path /images/profile-image.jpg
+2022-07-16 15:55:40.803016 [debug]: file path /home/zyue/lesson/newserver/resources//images/profile-image.jpg
+2022-07-16 15:55:40.803048 [debug]: filesize: 47176, 2 to 47300
+2022-07-16 15:55:40.809064 [debug]: request path /js/bootstrap.min.js
+2022-07-16 15:55:40.811592 [debug]: request path /js/jquery.magnific-popup.min.js
+2022-07-16 15:55:40.811688 [debug]: request path /js/smoothscroll.js
+2022-07-16 15:55:40.811874 [debug]: request path /js/wow.min.js
+2022-07-16 15:55:40.811938 [debug]: file path /home/zyue/lesson/newserver/resources//js/bootstrap.min.js
+2022-07-16 15:55:40.812119 [debug]: request path /js/magnific-popup-options.js
+2022-07-16 15:55:40.812155 [debug]: file path /home/zyue/lesson/newserver/resources//js/wow.min.js
+2022-07-16 15:55:40.812395 [debug]: request path /js/jquery.js
+2022-07-16 15:55:40.812576 [debug]: filesize: 36868, 2 to 36998
+2022-07-16 15:55:40.813424 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.js
+2022-07-16 15:55:40.813053 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.magnific-popup.min.js
+2022-07-16 15:55:40.813518 [debug]: filesize: 85658, 2 to 85788
+2022-07-16 15:55:40.813545 [debug]: filesize: 7082, 2 to 7211
+2022-07-16 15:55:40.813881 [debug]: filesize: 20932, 2 to 21062
+2022-07-16 15:55:40.813171 [debug]: file path /home/zyue/lesson/newserver/resources//js/smoothscroll.js
+2022-07-16 15:55:40.813943 [debug]: filesize: 4474, 2 to 4603
+2022-07-16 15:55:40.814374 [debug]: file path /home/zyue/lesson/newserver/resources//js/magnific-popup-options.js
+2022-07-16 15:55:40.814922 [debug]: filesize: 1069, 2 to 1198
+2022-07-16 15:55:40.821029 [debug]: request path /js/custom.js
+2022-07-16 15:55:40.821209 [debug]: file path /home/zyue/lesson/newserver/resources//js/custom.js
+2022-07-16 15:55:40.821267 [debug]: filesize: 1047, 2 to 1176
+2022-07-16 15:55:40.868816 [debug]: request path /video/xxx.mp4
+2022-07-16 15:55:40.869079 [debug]: file path /home/zyue/lesson/newserver/resources//video/xxx.mp4
+2022-07-16 15:55:40.870466 [debug]: filesize: 39667571, 2 to 39667698
+2022-07-16 15:55:43.942232 [debug]: request path /login.html
+2022-07-16 15:55:43.942314 [debug]: file path /home/zyue/lesson/newserver/resources//login.html
+2022-07-16 15:55:43.942519 [debug]: filesize: 3385, 2 to 3507
+2022-07-16 15:55:43.952809 [info]:  Client[20] quit!
+2022-07-16 15:55:43.953514 [info]:  Client[20](192.168.30.1:41726) quit, userCount: 5
+2022-07-16 15:55:43.975906 [debug]: request path /css/bootstrap.min.css
+2022-07-16 15:55:43.976059 [debug]: file path /home/zyue/lesson/newserver/resources//css/bootstrap.min.css
+2022-07-16 15:55:43.976092 [debug]: filesize: 121260, 2 to 121384
+2022-07-16 15:55:43.976614 [debug]: request path /css/animate.css
+2022-07-16 15:55:43.976748 [debug]: request path /css/magnific-popup.css
+2022-07-16 15:55:43.977670 [debug]: file path /home/zyue/lesson/newserver/resources//css/animate.css
+2022-07-16 15:55:43.978110 [debug]: filesize: 72922, 2 to 73045
+2022-07-16 15:55:43.978387 [debug]: request path /css/font-awesome.min.css
+2022-07-16 15:55:43.978892 [debug]: file path /home/zyue/lesson/newserver/resources//css/font-awesome.min.css
+2022-07-16 15:55:43.979038 [debug]: filesize: 27392, 2 to 27515
+2022-07-16 15:55:43.979490 [debug]: file path /home/zyue/lesson/newserver/resources//css/magnific-popup.css
+2022-07-16 15:55:43.980517 [debug]: request path /css/style.css
+2022-07-16 15:55:43.980851 [debug]: file path /home/zyue/lesson/newserver/resources//css/style.css
+2022-07-16 15:55:43.980970 [debug]: filesize: 9807, 2 to 9929
+2022-07-16 15:55:43.991338 [debug]: filesize: 6951, 2 to 7073
+2022-07-16 15:55:44.002784 [debug]: request path /js/jquery.js
+2022-07-16 15:55:44.002980 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.js
+2022-07-16 15:55:44.003026 [debug]: filesize: 85658, 2 to 85788
+2022-07-16 15:55:44.003491 [debug]: request path /js/smoothscroll.js
+2022-07-16 15:55:44.003547 [debug]: file path /home/zyue/lesson/newserver/resources//js/smoothscroll.js
+2022-07-16 15:55:44.003558 [debug]: filesize: 4474, 2 to 4603
+2022-07-16 15:55:44.003646 [debug]: request path /js/bootstrap.min.js
+2022-07-16 15:55:44.003708 [debug]: file path /home/zyue/lesson/newserver/resources//js/bootstrap.min.js
+2022-07-16 15:55:44.003730 [debug]: filesize: 36868, 2 to 36998
+2022-07-16 15:55:44.003980 [debug]: request path /js/jquery.magnific-popup.min.js
+2022-07-16 15:55:44.004257 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.magnific-popup.min.js
+2022-07-16 15:55:44.004272 [debug]: filesize: 20932, 2 to 21062
+2022-07-16 15:55:44.004546 [info]:  Client[20](192.168.30.1:43262) in, userCount: 6
+2022-07-16 15:55:44.004601 [info]:  Client[20] in!
+2022-07-16 15:55:44.005420 [debug]: request path /js/magnific-popup-options.js
+2022-07-16 15:55:44.005510 [debug]: file path /home/zyue/lesson/newserver/resources//js/magnific-popup-options.js
+2022-07-16 15:55:44.005555 [debug]: filesize: 1069, 2 to 1198
+2022-07-16 15:55:44.009070 [debug]: request path /js/custom.js
+2022-07-16 15:55:44.009332 [debug]: file path /home/zyue/lesson/newserver/resources//js/custom.js
+2022-07-16 15:55:44.009419 [debug]: filesize: 1047, 2 to 1176
+2022-07-16 15:55:44.009594 [debug]: request path /js/wow.min.js
+2022-07-16 15:55:44.009699 [debug]: file path /home/zyue/lesson/newserver/resources//js/wow.min.js
+2022-07-16 15:55:44.009775 [debug]: filesize: 7082, 2 to 7211
+2022-07-16 15:55:46.101947 [info]:  Client[21] quit!
+2022-07-16 15:55:46.102280 [info]:  Client[21](192.168.30.1:41982) quit, userCount: 5
+2022-07-16 15:55:46.102302 [info]:  Client[22] quit!
+2022-07-16 15:55:46.102474 [info]:  Client[22](192.168.30.1:42238) quit, userCount: 4
+2022-07-16 15:55:46.102544 [info]:  Client[23] quit!
+2022-07-16 15:55:46.102851 [info]:  Client[23](192.168.30.1:42494) quit, userCount: 3
+2022-07-16 15:55:46.102975 [info]:  Client[20] quit!
+2022-07-16 15:55:46.103114 [info]:  Client[20](192.168.30.1:43262) quit, userCount: 2
+2022-07-16 15:55:46.103159 [info]:  Client[18] quit!
+2022-07-16 15:55:46.103268 [info]:  Client[18](192.168.30.1:38654) quit, userCount: 1
+2022-07-16 15:55:46.103314 [info]:  Client[19] quit!
+2022-07-16 15:55:46.103430 [info]:  Client[19](192.168.30.1:39934) quit, userCount: 0
+2022-07-16 15:55:46.731299 [info]:  Client[18](192.168.30.1:45822) in, userCount: 1
+2022-07-16 15:55:46.731430 [info]:  Client[18] in!
+2022-07-16 15:55:46.731444 [info]:  Client[19](192.168.30.1:47102) in, userCount: 2
+2022-07-16 15:55:46.731450 [info]:  Client[19] in!
+2022-07-16 15:55:46.735319 [debug]: request path /index.html
+2022-07-16 15:55:46.735453 [debug]: file path /home/zyue/lesson/newserver/resources//index.html
+2022-07-16 15:55:46.735687 [debug]: filesize: 3148, 2 to 3270
+2022-07-16 15:55:46.754820 [debug]: request path /css/bootstrap.min.css
+2022-07-16 15:55:46.754904 [debug]: file path /home/zyue/lesson/newserver/resources//css/bootstrap.min.css
+2022-07-16 15:55:46.754930 [debug]: filesize: 121260, 2 to 121384
+2022-07-16 15:55:46.755484 [debug]: request path /css/animate.css
+2022-07-16 15:55:46.755864 [debug]: file path /home/zyue/lesson/newserver/resources//css/animate.css
+2022-07-16 15:55:46.756299 [debug]: filesize: 72922, 2 to 73045
+2022-07-16 15:55:46.764040 [info]:  Client[20](192.168.30.1:47614) in, userCount: 3
+2022-07-16 15:55:46.764338 [info]:  Client[20] in!
+2022-07-16 15:55:46.765367 [info]:  Client[21](192.168.30.1:47870) in, userCount: 4
+2022-07-16 15:55:46.765687 [info]:  Client[21] in!
+2022-07-16 15:55:46.767018 [debug]: request path /css/magnific-popup.css
+2022-07-16 15:55:46.767468 [debug]: file path /home/zyue/lesson/newserver/resources//css/magnific-popup.css
+2022-07-16 15:55:46.767636 [debug]: filesize: 6951, 2 to 7073
+2022-07-16 15:55:46.767800 [info]:  Client[22](192.168.30.1:48126) in, userCount: 5
+2022-07-16 15:55:46.768040 [info]:  Client[22] in!
+2022-07-16 15:55:46.769611 [debug]: request path /css/font-awesome.min.css
+2022-07-16 15:55:46.770941 [debug]: request path /css/style.css
+2022-07-16 15:55:46.770992 [debug]: file path /home/zyue/lesson/newserver/resources//css/style.css
+2022-07-16 15:55:46.771028 [debug]: filesize: 9807, 2 to 9929
+2022-07-16 15:55:46.771244 [debug]: file path /home/zyue/lesson/newserver/resources//css/font-awesome.min.css
+2022-07-16 15:55:46.771345 [debug]: filesize: 27392, 2 to 27515
+2022-07-16 15:55:46.835002 [debug]: request path /js/jquery.js
+2022-07-16 15:55:46.835104 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.js
+2022-07-16 15:55:46.835124 [debug]: filesize: 85658, 2 to 85788
+2022-07-16 15:55:46.835823 [debug]: request path /js/bootstrap.min.js
+2022-07-16 15:55:46.835999 [debug]: file path /home/zyue/lesson/newserver/resources//js/bootstrap.min.js
+2022-07-16 15:55:46.836073 [debug]: filesize: 36868, 2 to 36998
+2022-07-16 15:55:46.836574 [debug]: request path /js/jquery.magnific-popup.min.js
+2022-07-16 15:55:46.836636 [debug]: request path /js/smoothscroll.js
+2022-07-16 15:55:46.836726 [info]:  Client[24](192.168.30.1:48382) in, userCount: 6
+2022-07-16 15:55:46.836780 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.magnific-popup.min.js
+2022-07-16 15:55:46.836799 [info]:  Client[24] in!
+2022-07-16 15:55:46.836820 [debug]: filesize: 20932, 2 to 21062
+2022-07-16 15:55:46.837425 [debug]: request path /js/magnific-popup-options.js
+2022-07-16 15:55:46.837505 [debug]: file path /home/zyue/lesson/newserver/resources//js/magnific-popup-options.js
+2022-07-16 15:55:46.837526 [debug]: filesize: 1069, 2 to 1198
+2022-07-16 15:55:46.838664 [debug]: request path /js/wow.min.js
+2022-07-16 15:55:46.838715 [debug]: file path /home/zyue/lesson/newserver/resources//js/wow.min.js
+2022-07-16 15:55:46.838733 [debug]: filesize: 7082, 2 to 7211
+2022-07-16 15:55:46.839027 [debug]: file path /home/zyue/lesson/newserver/resources//js/smoothscroll.js
+2022-07-16 15:55:46.839189 [debug]: filesize: 4474, 2 to 4603
+2022-07-16 15:55:46.850956 [debug]: request path /js/custom.js
+2022-07-16 15:55:46.851082 [debug]: file path /home/zyue/lesson/newserver/resources//js/custom.js
+2022-07-16 15:55:46.851138 [debug]: filesize: 1047, 2 to 1176
+2022-07-16 15:55:46.852184 [debug]: request path /images/profile-image.jpg
+2022-07-16 15:55:46.852356 [debug]: file path /home/zyue/lesson/newserver/resources//images/profile-image.jpg
+2022-07-16 15:55:46.852432 [debug]: filesize: 47176, 2 to 47300
+2022-07-16 15:55:49.574456 [debug]: request path /picture.html
+2022-07-16 15:55:49.574636 [debug]: file path /home/zyue/lesson/newserver/resources//picture.html
+2022-07-16 15:55:49.574722 [debug]: filesize: 3960, 2 to 4082
+2022-07-16 15:55:49.603840 [debug]: request path /css/bootstrap.min.css
+2022-07-16 15:55:49.604128 [debug]: file path /home/zyue/lesson/newserver/resources//css/bootstrap.min.css
+2022-07-16 15:55:49.604288 [debug]: filesize: 121260, 2 to 121384
+2022-07-16 15:55:49.605435 [debug]: request path /css/animate.css
+2022-07-16 15:55:49.605462 [debug]: request path /css/magnific-popup.css
+2022-07-16 15:55:49.606098 [debug]: file path /home/zyue/lesson/newserver/resources//css/animate.css
+2022-07-16 15:55:49.607909 [debug]: file path /home/zyue/lesson/newserver/resources//css/magnific-popup.css
+2022-07-16 15:55:49.608139 [debug]: filesize: 6951, 2 to 7073
+2022-07-16 15:55:49.608211 [debug]: request path /css/font-awesome.min.css
+2022-07-16 15:55:49.608393 [debug]: file path /home/zyue/lesson/newserver/resources//css/font-awesome.min.css
+2022-07-16 15:55:49.608513 [debug]: filesize: 27392, 2 to 27515
+2022-07-16 15:55:49.609294 [debug]: request path /css/style.css
+2022-07-16 15:55:49.609700 [debug]: file path /home/zyue/lesson/newserver/resources//css/style.css
+2022-07-16 15:55:49.609955 [debug]: filesize: 9807, 2 to 9929
+2022-07-16 15:55:49.610070 [debug]: filesize: 72922, 2 to 73045
+2022-07-16 15:55:49.666213 [debug]: request path /js/jquery.js
+2022-07-16 15:55:49.666679 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.js
+2022-07-16 15:55:49.667125 [debug]: filesize: 85658, 2 to 85788
+2022-07-16 15:55:49.667717 [debug]: request path /js/smoothscroll.js
+2022-07-16 15:55:49.668020 [debug]: file path /home/zyue/lesson/newserver/resources//js/smoothscroll.js
+2022-07-16 15:55:49.668231 [debug]: filesize: 4474, 2 to 4603
+2022-07-16 15:55:49.668298 [debug]: request path /js/bootstrap.min.js
+2022-07-16 15:55:49.670106 [debug]: request path /js/magnific-popup-options.js
+2022-07-16 15:55:49.672340 [debug]: file path /home/zyue/lesson/newserver/resources//js/magnific-popup-options.js
+2022-07-16 15:55:49.672378 [debug]: request path /js/wow.min.js
+2022-07-16 15:55:49.672515 [debug]: file path /home/zyue/lesson/newserver/resources//js/wow.min.js
+2022-07-16 15:55:49.672641 [debug]: filesize: 7082, 2 to 7211
+2022-07-16 15:55:49.672691 [debug]: request path /js/jquery.magnific-popup.min.js
+2022-07-16 15:55:49.672813 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.magnific-popup.min.js
+2022-07-16 15:55:49.672945 [debug]: filesize: 20932, 2 to 21062
+2022-07-16 15:55:49.672968 [debug]: file path /home/zyue/lesson/newserver/resources//js/bootstrap.min.js
+2022-07-16 15:55:49.673057 [debug]: filesize: 36868, 2 to 36998
+2022-07-16 15:55:49.680467 [debug]: request path /images/profile-image.jpg
+2022-07-16 15:55:49.680722 [debug]: file path /home/zyue/lesson/newserver/resources//images/profile-image.jpg
+2022-07-16 15:55:49.680795 [debug]: filesize: 47176, 2 to 47300
+2022-07-16 15:55:49.680892 [debug]: request path /js/custom.js
+2022-07-16 15:55:49.680984 [debug]: file path /home/zyue/lesson/newserver/resources//js/custom.js
+2022-07-16 15:55:49.672380 [debug]: filesize: 1069, 2 to 1198
+2022-07-16 15:55:49.681594 [debug]: request path /images/instagram-image1.jpg
+2022-07-16 15:55:49.681633 [debug]: filesize: 1047, 2 to 1176
+2022-07-16 15:55:49.681986 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image1.jpg
+2022-07-16 15:55:49.682192 [debug]: filesize: 75836, 2 to 75960
+2022-07-16 15:55:49.690416 [debug]: request path /images/instagram-image2.jpg
+2022-07-16 15:55:49.690729 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image2.jpg
+2022-07-16 15:55:49.690946 [debug]: filesize: 67313, 2 to 67437
+2022-07-16 15:55:49.691595 [debug]: request path /images/instagram-image3.jpg
+2022-07-16 15:55:49.692174 [debug]: request path /images/instagram-image4.jpg
+2022-07-16 15:55:49.692362 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image4.jpg
+2022-07-16 15:55:49.692518 [debug]: filesize: 103418, 2 to 103543
+2022-07-16 15:55:49.692565 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image3.jpg
+2022-07-16 15:55:49.692584 [debug]: filesize: 59528, 2 to 59652
+2022-07-16 15:55:49.692815 [debug]: request path /images/instagram-image5.jpg
+2022-07-16 15:55:49.692917 [debug]: file path /home/zyue/lesson/newserver/resources//images/instagram-image5.jpg
+2022-07-16 15:55:49.692974 [debug]: filesize: 49545, 2 to 49669
+2022-07-16 15:55:56.159162 [info]:  Client[22] quit!
+2022-07-16 15:55:56.159515 [info]:  Client[22](192.168.30.1:48126) quit, userCount: 5
+2022-07-16 15:55:56.159534 [info]:  Client[19] quit!
+2022-07-16 15:55:56.159682 [info]:  Client[19](192.168.30.1:47102) quit, userCount: 4
+2022-07-16 15:55:56.159693 [info]:  Client[20] quit!
+2022-07-16 15:55:56.159816 [info]:  Client[20](192.168.30.1:47614) quit, userCount: 3
+2022-07-16 15:55:56.159833 [info]:  Client[24] quit!
+2022-07-16 15:55:56.159941 [info]:  Client[24](192.168.30.1:48382) quit, userCount: 2
+2022-07-16 15:55:56.159952 [info]:  Client[21] quit!
+2022-07-16 15:55:56.160078 [info]:  Client[21](192.168.30.1:47870) quit, userCount: 1
+2022-07-16 15:55:56.160087 [info]:  Client[18] quit!
+2022-07-16 15:55:56.160195 [info]:  Client[18](192.168.30.1:45822) quit, userCount: 0
+2022-07-16 15:55:57.282386 [info]:  Client[18](192.168.30.1:50174) in, userCount: 1
+2022-07-16 15:55:57.282558 [info]:  Client[18] in!
+2022-07-16 15:55:57.282624 [info]:  Client[19](192.168.30.1:50430) in, userCount: 2
+2022-07-16 15:55:57.282662 [info]:  Client[19] in!
+2022-07-16 15:55:57.285721 [debug]: request path /video.html
+2022-07-16 15:55:57.285804 [debug]: file path /home/zyue/lesson/newserver/resources//video.html
+2022-07-16 15:55:57.285827 [debug]: filesize: 3347, 2 to 3469
+2022-07-16 15:55:57.309793 [debug]: request path /css/bootstrap.min.css
+2022-07-16 15:55:57.310043 [debug]: file path /home/zyue/lesson/newserver/resources//css/bootstrap.min.css
+2022-07-16 15:55:57.310086 [debug]: filesize: 121260, 2 to 121384
+2022-07-16 15:55:57.310537 [debug]: request path /css/animate.css
+2022-07-16 15:55:57.310570 [debug]: file path /home/zyue/lesson/newserver/resources//css/animate.css
+2022-07-16 15:55:57.310586 [debug]: filesize: 72922, 2 to 73045
+2022-07-16 15:55:57.310654 [info]:  Client[20](192.168.30.1:51198) in, userCount: 3
+2022-07-16 15:55:57.310705 [info]:  Client[20] in!
+2022-07-16 15:55:57.310760 [info]:  Client[21](192.168.30.1:51454) in, userCount: 4
+2022-07-16 15:55:57.310895 [info]:  Client[21] in!
+2022-07-16 15:55:57.310957 [info]:  Client[22](192.168.30.1:51710) in, userCount: 5
+2022-07-16 15:55:57.310993 [info]:  Client[22] in!
+2022-07-16 15:55:57.320003 [debug]: request path /css/style.css
+2022-07-16 15:55:57.320308 [debug]: file path /home/zyue/lesson/newserver/resources//css/style.css
+2022-07-16 15:55:57.320427 [debug]: filesize: 9807, 2 to 9929
+2022-07-16 15:55:57.320016 [debug]: request path /css/magnific-popup.css
+2022-07-16 15:55:57.320570 [debug]: file path /home/zyue/lesson/newserver/resources//css/magnific-popup.css
+2022-07-16 15:55:57.320587 [debug]: filesize: 6951, 2 to 7073
+2022-07-16 15:55:57.326980 [debug]: request path /css/font-awesome.min.css
+2022-07-16 15:55:57.327152 [debug]: file path /home/zyue/lesson/newserver/resources//css/font-awesome.min.css
+2022-07-16 15:55:57.327189 [debug]: filesize: 27392, 2 to 27515
+2022-07-16 15:55:57.376351 [debug]: request path /js/bootstrap.min.js
+2022-07-16 15:55:57.376554 [debug]: file path /home/zyue/lesson/newserver/resources//js/bootstrap.min.js
+2022-07-16 15:55:57.376576 [debug]: filesize: 36868, 2 to 36998
+2022-07-16 15:55:57.377007 [debug]: request path /js/smoothscroll.js
+2022-07-16 15:55:57.377106 [info]:  Client[23](192.168.30.1:51966) in, userCount: 6
+2022-07-16 15:55:57.377161 [info]:  Client[23] in!
+2022-07-16 15:55:57.377209 [debug]: file path /home/zyue/lesson/newserver/resources//js/smoothscroll.js
+2022-07-16 15:55:57.377246 [debug]: filesize: 4474, 2 to 4603
+2022-07-16 15:55:57.378030 [debug]: request path /js/magnific-popup-options.js
+2022-07-16 15:55:57.378127 [debug]: request path /js/jquery.magnific-popup.min.js
+2022-07-16 15:55:57.378210 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.magnific-popup.min.js
+2022-07-16 15:55:57.378268 [debug]: file path /home/zyue/lesson/newserver/resources//js/magnific-popup-options.js
+2022-07-16 15:55:57.378313 [debug]: filesize: 20932, 2 to 21062
+2022-07-16 15:55:57.378825 [debug]: filesize: 1069, 2 to 1198
+2022-07-16 15:55:57.379344 [debug]: request path /js/wow.min.js
+2022-07-16 15:55:57.379789 [debug]: file path /home/zyue/lesson/newserver/resources//js/wow.min.js
+2022-07-16 15:55:57.381337 [debug]: filesize: 7082, 2 to 7211
+2022-07-16 15:55:57.382345 [debug]: request path /js/jquery.js
+2022-07-16 15:55:57.383683 [debug]: file path /home/zyue/lesson/newserver/resources//js/jquery.js
+2022-07-16 15:55:57.384513 [debug]: filesize: 85658, 2 to 85788
+2022-07-16 15:55:57.393533 [debug]: request path /js/custom.js
+2022-07-16 15:55:57.393969 [debug]: file path /home/zyue/lesson/newserver/resources//js/custom.js
+2022-07-16 15:55:57.394080 [debug]: filesize: 1047, 2 to 1176
+2022-07-16 15:55:57.395884 [debug]: request path /images/profile-image.jpg
+2022-07-16 15:55:57.396880 [debug]: file path /home/zyue/lesson/newserver/resources//images/profile-image.jpg
+2022-07-16 15:55:57.397737 [debug]: filesize: 47176, 2 to 47300
+2022-07-16 15:55:57.442541 [debug]: request path /video/xxx.mp4
+2022-07-16 15:55:57.442784 [debug]: file path /home/zyue/lesson/newserver/resources//video/xxx.mp4
+2022-07-16 15:55:57.442926 [debug]: filesize: 39667571, 2 to 39667698

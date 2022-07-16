@@ -167,10 +167,12 @@ bool HttpRequest::parseBody_(const std::string &line) {
  * 使用post的形式进行登录信息的传输
  */
 bool HttpRequest::parsePost_() {
-    if (body_.size() < atol(header_["Content-Length"].c_str())) {
+    long unsigned int bodyLen = stoi(header_["Content-Length"]);
+    if (body_.size() < bodyLen) {
         /*判断post数据是否接受完整，未接收完则返回false，表示继续请求*/
         return false;
     }
+
     /*以后可以添加其他种类的Content-Type的支持*/
     if (method_ == "POST" && header_["Content-Type"] == "application/x-www-form-urlencoded") {
         /*将请求体中的内容解析到post_变量中*/
@@ -268,9 +270,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, bo
 
     /*初始化一系列相关变量*/
     bool         flag       = false;
-    unsigned int j          = 0;
     char         order[256] = {0};
-    MYSQL_FIELD *fields     = nullptr;
     MYSQL_RES   *res        = nullptr;
 
     /*如果是注册，那么将flag置为true*/
@@ -289,9 +289,9 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, bo
     /*从表中检索完整的结果集*/
     res = mysql_store_result(sql);
     /*返回结果集中的列数*/
-    j = mysql_num_fields(res);
+    mysql_num_fields(res);
     /*返回所有字段结构的数组*/
-    fields = mysql_fetch_fields(res);
+    mysql_fetch_fields(res);
 
     /*从结果集中获取下一行*/
     while (MYSQL_ROW row = mysql_fetch_row(res)) {

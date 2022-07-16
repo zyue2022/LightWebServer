@@ -9,8 +9,8 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int 
       timeoutMS_(timeoutMS),
       openLinger_(optLinger),
       isClose_(false),
-      timer_(new HeapTimer()),
       epoller_(new Epoller()),
+      timer_(new HeapTimer()),
       threadPool_(new ThreadPool(threadNum)) {
     /*获取资源目录*/
     srcDir_ = getcwd(nullptr, 256);

@@ -25,19 +25,21 @@ private:
 
     static bool isET;  // 指示本地监听的工作模式
 
-    int   port_;        // 监听的端口
-    int   listenFd_;    // 监听的文件描述符
-    bool  isClose_;     // 指示InitSocket操作是否成功
-    int   timeoutMS_;   // 毫秒MS
-    char *srcDir_;      // 资源文件目录
-    bool  openLinger_;  // 对于残存在套接字发送队列中的数据：丢弃或者将发送至对端，优雅关闭连接。
+    int port_;       // 监听的端口
+    int listenFd_;   // 监听的文件描述符
+    int timeoutMS_;  // 超时时间
+
+    bool openLinger_;  // 对于残存在套接字发送队列中的数据：丢弃或者将发送至对端，优雅关闭连接。
+    bool isClose_;     // 指示InitSocket操作是否成功
+
+    char *srcDir_;  // 资源文件目录
 
     uint32_t listenEvent_;  // 监听描述符上的epoll事件
     uint32_t connEvent_;    // 客户端连接的socket描述符上的epoll事件
 
+    std::unique_ptr<Epoller>          epoller_;     // epoller变量
     std::unique_ptr<HeapTimer>        timer_;       // 基于小根堆的定时器
     std::unique_ptr<ThreadPool>       threadPool_;  // 线程池
-    std::unique_ptr<Epoller>          epoller_;     // epoller变量
     std::unordered_map<int, HttpConn> users_;       // 连接用到时再实例化
 
 public:

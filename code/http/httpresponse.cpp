@@ -48,7 +48,7 @@ const std::unordered_map<int, std::string> HttpResponse::CODE_PATH = {
  * 构造函数中初始化相关变量
  */
 HttpResponse::HttpResponse()
-    : code_(-1), path_(""), srcDir_(""), isKeepAlive_(false), mmFile_(nullptr) {
+    : code_(-1), isKeepAlive_(false), path_(""), srcDir_(""), mmFile_(nullptr) {
     mmFileStat_ = {0};
 }
 
