@@ -1,10 +1,10 @@
 /*
  * @Description  : HTTP连接类
  * @Date         : 2022-07-16 01:14:05
- * @LastEditTime : 2022-07-17 00:21:01
+ * @LastEditTime : 2022-07-18 00:01:00
  */
-#ifndef MY_WEBSERVER_HTTPCONN_H
-#define MY_WEBSERVER_HTTPCONN_H
+#ifndef HTTPCONN_H
+#define HTTPCONN_H
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -64,4 +64,4 @@ public:
     bool isKeepAlive() const;
 };
 
-#endif  //MY_WEBSERVER_HTTPCONN_H
+#endif  //HTTPCONN_H

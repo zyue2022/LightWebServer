@@ -1,10 +1,10 @@
 /*
  * @Description  : 日志记录模块，按天按行按级别记录，同步或异步记录，单例模式
  * @Date         : 2022-07-16 01:14:05
- * @LastEditTime : 2022-07-16 21:32:55
+ * @LastEditTime : 2022-07-18 00:01:36
  */
-#ifndef MY_WEBSERVER_LOG_H
-#define MY_WEBSERVER_LOG_H
+#ifndef LOG_H
+#define LOG_H
 
 #include <assert.h>
 #include <stdarg.h> /*va_start va_end*/
@@ -104,4 +104,4 @@ public:
         LOG_BASE(3, format, ##__VA_ARGS__) \
     } while (0);
 
-#endif  //MY_WEBSERVER_LOG_H
+#endif  //LOG_H

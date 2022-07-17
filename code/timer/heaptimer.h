@@ -1,10 +1,10 @@
 /*
  * @Description  : 最小堆定时器
  * @Date         : 2022-07-16 01:14:05
- * @LastEditTime : 2022-07-16 21:44:32
+ * @LastEditTime : 2022-07-18 00:02:18
  */
-#ifndef MY_WEBSERVER_HEAPTIMER_H
-#define MY_WEBSERVER_HEAPTIMER_H
+#ifndef HEAPTIMER_H
+#define HEAPTIMER_H
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -64,4 +64,4 @@ public:
     void doWork(int fd);
 };
 
-#endif  //MY_WEBSERVER_HEAPTIMER_H
+#endif  //HEAPTIMER_H

@@ -22,6 +22,14 @@ void HttpRequest::init() {
     post_.clear();
 }
 
+HttpRequest::PARSE_STATE HttpRequest::state() const { return state_; }
+
+std::string HttpRequest::path() const { return path_; }
+
+std::string HttpRequest::method() const { return method_; }
+
+std::string HttpRequest::version() const { return version_; }
+
 bool HttpRequest::isKeepAlive() const {
     if (header_.count("Connection") == 1) {
         return header_.find("Connection")->second == "keep-alive" && version_ == "1.1";
@@ -44,16 +52,8 @@ int HttpRequest::convertHex(char ch) {
     return ch - '0';
 }
 
-HttpRequest::PARSE_STATE HttpRequest::state() const { return state_; }
-
-std::string HttpRequest::path() const { return path_; }
-
-std::string HttpRequest::method() const { return method_; }
-
-std::string HttpRequest::version() const { return version_; }
-
 /**
- * @description: 返回请求头中指定键对应的数据
+ * @description: 返回请求头中指定键对应的数据,未用到
  * @param {string} &key
  * @return {string}
  */
@@ -63,6 +63,22 @@ std::string HttpRequest::getPost(const std::string &key) const {
         return post_.find(key)->second;
     }
     return "";
+}
+
+/**
+ * @description: 将客户端传来的path变量添加完整，以目录结束的路径添加上默认页面
+ */
+void HttpRequest::parsePath_() {
+    if (path_ == "/") {  // 浏览器加上 /index.html 时会被自动转化为 /
+        path_ = "/index.html";
+    } else {
+        for (auto &item : DEFAULT_HTML) {
+            if (item == path_) {
+                path_ += ".html";
+                break;
+            }
+        }
+    }
 }
 
 /**
@@ -303,22 +319,6 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, bo
 
     LOG_DEBUG("UserVerify success!!");
     return flag;
-}
-
-/**
- * @description: 将客户端传来的path变量添加完整，以目录结束的路径添加上默认页面
- */
-void HttpRequest::parsePath_() {
-    if (path_ == "/") {  // 浏览器加上 /index.html 时会被自动转化为 /
-        path_ = "/index.html";
-    } else {
-        for (auto &item : DEFAULT_HTML) {
-            if (item == path_) {
-                path_ += ".html";
-                break;
-            }
-        }
-    }
 }
 
 /**

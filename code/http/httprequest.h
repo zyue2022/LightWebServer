@@ -1,10 +1,10 @@
 /*
  * @Description  : HTTP请求的解析类
  * @Date         : 2022-07-16 01:14:05
- * @LastEditTime : 2022-07-17 00:52:46
+ * @LastEditTime : 2022-07-18 00:01:12
  */
-#ifndef MY_WEBSERVER_HTTPREQUEST_H
-#define MY_WEBSERVER_HTTPREQUEST_H
+#ifndef HTTPREQUEST_H
+#define HTTPREQUEST_H
 
 #include <errno.h>
 #include <mysql/mysql.h>
@@ -76,4 +76,4 @@ private:
     void parseFromUrlencoded_();
 };
 
-#endif  //MY_WEBSERVER_HTTPREQUEST_H
+#endif  //HTTPREQUEST_H

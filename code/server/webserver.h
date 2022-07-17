@@ -1,10 +1,10 @@
 /*
  * @Description  : 服务器类
  * @Date         : 2022-07-16 01:14:06
- * @LastEditTime : 2022-07-17 15:33:34
+ * @LastEditTime : 2022-07-18 00:02:08
  */
-#ifndef MY_WEBSERVER_WEBSERVER_H
-#define MY_WEBSERVER_WEBSERVER_H
+#ifndef WEBSERVER_H
+#define WEBSERVER_H
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -51,7 +51,7 @@ public:
 
     ~WebServer();
 
-    void start();
+    void run();
 
 private:
     static int setFdNonblock(int fd);
@@ -74,4 +74,4 @@ private:
     void onProcess_(HttpConn *client);
 };
 
-#endif  //MY_WEBSERVER_WEBSERVER_H
+#endif  //WEBSERVER_H

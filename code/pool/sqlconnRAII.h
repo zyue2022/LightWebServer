@@ -1,10 +1,10 @@
 /*
  * @Description  : RAII机制封装MySQL连接类，用于从连接池取出连接
  * @Date         : 2022-07-16 01:14:06
- * @LastEditTime : 2022-07-16 23:39:30
+ * @LastEditTime : 2022-07-18 00:01:45
  */
-#ifndef MY_WEBSERVER_SQLCONNRAII_H
-#define MY_WEBSERVER_SQLCONNRAII_H
+#ifndef SQLCONNRAII_H
+#define SQLCONNRAII_H
 
 #include "sqlconnpool.h"
 
@@ -35,4 +35,4 @@ public:
     }
 };
 
-#endif  //MY_WEBSERVER_SQLCONNRAII_H
+#endif  //SQLCONNRAII_H

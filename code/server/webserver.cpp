@@ -305,6 +305,20 @@ void WebServer::onRead_(HttpConn *client) {
 }
 
 /**
+ * @description: 处理http报文请求
+ * @param {HttpConn} *client
+ */
+void WebServer::onProcess_(HttpConn *client) {
+    if (client->process()) {
+        /*成功处理则将epoll在该文件描述符上的监听事件改为EPOLLOUT写事件*/
+        epoller_->modFd(client->getFd(), connEvent_ | EPOLLOUT);
+    } else {
+        /*未成功处理，说明数据还没有读完，需要继续使用epoll监听该连接上的EPOLLIN读事件*/
+        epoller_->modFd(client->getFd(), connEvent_ | EPOLLIN);
+    }
+}
+
+/**
  * @description: 向对应的socket发送响应报文数据
  * @param {HttpConn} *client
  */
@@ -335,20 +349,6 @@ void WebServer::onWrite_(HttpConn *client) {
 }
 
 /**
- * @description: 处理http报文请求
- * @param {HttpConn} *client
- */
-void WebServer::onProcess_(HttpConn *client) {
-    if (client->process()) {
-        /*成功处理则将epoll在该文件描述符上的监听事件改为EPOLLOUT写事件*/
-        epoller_->modFd(client->getFd(), connEvent_ | EPOLLOUT);
-    } else {
-        /*未成功处理，说明数据还没有读完，需要继续使用epoll监听该连接上的EPOLLIN读事件*/
-        epoller_->modFd(client->getFd(), connEvent_ | EPOLLIN);
-    }
-}
-
-/**
  * @description: 读取一个客户端连接发送来的数据，调整当前连接的过期时间，向线程池中添加读数据的任务
  * @param {HttpConn} *client
  */
@@ -371,10 +371,10 @@ void WebServer::dealWrite_(HttpConn *client) {
 /**
  * @description: 启动服务器，主线程工作
  */
-void WebServer::start() {
+void WebServer::run() {
     int timeMS = -1;
     if (!isClose_) {
-        LOG_INFO("================Server start================");
+        LOG_INFO("================Server run================");
     }
 
     /*根据不同的事件调用不同的函数*/

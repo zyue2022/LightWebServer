@@ -166,7 +166,7 @@ ssize_t Buffer::readFd(int fd, int *saveErrno) {
 }
 
 /**
- * @description: 往socket中写数据，并设置可能的错误号
+ * @description: 往socket中写数据，并设置可能的错误号，未用到
  * @param {int} fd
  * @param {int} *saveErrno
  * @return 返回写了多少字节

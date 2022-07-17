@@ -1,5 +1,5 @@
-#ifndef MY_WEBSERVER_THREADPOOL_H
-#define MY_WEBSERVER_THREADPOOL_H
+#ifndef THREADPOOL_H
+#define THREADPOOL_H
 
 #include <assert.h>
 
@@ -79,4 +79,4 @@ void ThreadPool::addTask(F&& task) {
     cond.notify_one();
 }
 
-#endif  //MY_WEBSERVER_THREADPOOL_H
+#endif  //THREADPOOL_H

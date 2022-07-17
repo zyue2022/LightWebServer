@@ -1,10 +1,10 @@
 /*
  * @Description  : 封装生产者消费者模型，实现线程安全的阻塞队列
  * @Date         : 2022-07-16 01:14:05
- * @LastEditTime : 2022-07-16 20:19:46
+ * @LastEditTime : 2022-07-18 00:01:28
  */
-#ifndef MY_WEBSERVER_BLOCKQUEUE_H
-#define MY_WEBSERVER_BLOCKQUEUE_H
+#ifndef BLOCKQUEUE_H
+#define BLOCKQUEUE_H
 
 #include <assert.h>
 #include <sys/time.h>
@@ -169,4 +169,4 @@ bool BlockQueue<T>::pop(T &item, int timeout) {
 
     return true;
 }
-#endif  //MY_WEBSERVER_BLOCKQUEUE_H
+#endif  //BLOCKQUEUE_H

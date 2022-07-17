@@ -1,10 +1,10 @@
 /*
  * @Description  : epoll实例类
  * @Date         : 2022-07-16 01:14:05
- * @LastEditTime : 2022-07-17 01:53:30
+ * @LastEditTime : 2022-07-18 00:02:01
  */
-#ifndef MY_WEBSERVER_EPOLLER_H
-#define MY_WEBSERVER_EPOLLER_H
+#ifndef EPOLLER_H
+#define EPOLLER_H
 
 #include <assert.h>
 #include <errno.h>
@@ -34,4 +34,4 @@ public:
     uint32_t getEvents(size_t i) const;
 };
 
-#endif  //MY_WEBSERVER_EPOLLER_H
+#endif  //EPOLLER_H
