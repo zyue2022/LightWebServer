@@ -10,7 +10,7 @@ const std::unordered_map<std::string, int> HttpRequest::DEFAULT_HTML_TAG{{"/regi
 HttpRequest::HttpRequest() { init(); }
 
 /**
- * @description: 初始化相关变量，由构造函数调用
+ * @description: 初始化;构造函数会第一次调用他
  */
 void HttpRequest::init() {
     method_ = path_ = version_ = body_ = "";
@@ -329,12 +329,6 @@ HttpRequest::HTTP_CODE HttpRequest::parse(Buffer &buff) {
     /*在请求头的每一行结尾都有下面这两个字符*/
     const char CRLF[] = "\r\n";
 
-    /*若没有内容可以被读取，直接返回false，这里是有问题的，应该返回一个NO_REQUEST状态，
-    调用函数接受到该状态之后重新修改EPOLL事件注册一个EPOLLIN事件*/
-    if (buff.readableBytes() <= 0) {
-        return NO_REQUEST;
-    }
-
     /*状态机方式解析http请求头*/
     while (buff.readableBytes() && state_ != FINISH) {
         /*首先通过查找CRLF标志找到一行的结尾，用于在序列 A 中查找序列 B 第一次出现的位置,
@@ -380,6 +374,6 @@ HttpRequest::HTTP_CODE HttpRequest::parse(Buffer &buff) {
         buff.retrieveUntil(lineEnd + 2);
     }
     LOG_DEBUG("[%s], [%s], [%s]", method_.c_str(), path_.c_str(), version_.c_str());
-    /*最后最好直接返回NO_REQUEST状态，表示如果执行到这一部分，说明请求没有接受完整，需要继续接受请求，若是请求完整的在之前就会return出while*/
+    /*返回NO_REQUEST状态，表示请求没有接受完整，需要继续接受请求*/
     return NO_REQUEST;
 }

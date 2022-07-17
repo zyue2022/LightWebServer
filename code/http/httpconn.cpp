@@ -113,27 +113,25 @@ ssize_t HttpConn::write(int *saveErrno) {
  * @description: 处理每个客户端的连接，调度解析类与响应类
  *              - 成员变量中的解析类用来解析请求；
  *              - 成员变量中响应类用来制造响应；
+ *              - 负责从读缓冲区中解析请求报文，往写缓冲区添加响应报文
  */
 bool HttpConn::process() {
     /*
      * httprequest类对象负责解析请求，它会在自己的构造函数中init，
      * 一个客户端连接可能有多次请求，需要保存上次连接的状态，用以指示是否为新的http请求
-     * 只有当上一次的请求为完成状态时，才重新init，以重新开始解析一个http请求
+     * 只有当上一次的请求为完成状态时，才重新init，以重新开始解析一个http请求 
      */
     if (request_.state() == HttpRequest::FINISH) request_.init();
 
-    /*检查读缓存区中是否存在可读数据*/
-    if (readBuff_.readableBytes() <= 0) return false;
-
+    /*使用httprequest类对象解析请求内容，若解析完成，进入回复请求阶段，若失败进入其它分支*/
     HttpRequest::HTTP_CODE processStatus = request_.parse(readBuff_);
-    if (processStatus == HttpRequest::GET_REQUEST) {
-        /*使用httprequest类对象解析请求内容，若解析完成，进入回复请求阶段，若失败进入下一个分支*/
+    if (processStatus == HttpRequest::NO_REQUEST) {
+        /*请求没有读取完整，应该继续读取请求,返回false让上一层继续读取请求数据*/
+        return false;
+    } else if (processStatus == HttpRequest::GET_REQUEST) {
         LOG_DEBUG("request path %s", request_.path().c_str());
         /*初始化一个httpresponse对象，负责http应答阶段*/
         response_.init(srcDir, request_.path(), request_.isKeepAlive(), 200);
-    } else if (processStatus == HttpRequest::NO_REQUEST) {
-        /*请求没有读取完整，应该继续读取请求,返回false让上一层继续读取请求数据*/
-        return false;
     } else {
         /*其他情况表示解析失败，则返回400错误*/
         response_.init(srcDir, request_.path(), false, 400);
@@ -146,7 +144,7 @@ bool HttpConn::process() {
     iov_[0].iov_len  = writeBuff_.readableBytes();
     iovCnt_          = 1;
     /*如果需要返回服务器的文件内容，且文件内容不为空*/
-    if (response_.fileLen() > 0 && response_.file()) {
+    if (response_.file() && response_.fileLen() > 0) {
         /*将文件映射到内存后的地址以及文件长度赋值给iov_变量*/
         iov_[1].iov_base = response_.file();
         iov_[1].iov_len  = response_.fileLen();

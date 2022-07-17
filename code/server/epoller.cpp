@@ -56,7 +56,8 @@ bool Epoller::delFd(int fd) {
 
 /**
  * @description: 包装epoll等待函数
- * @param {int} timeoutMS
+ * @param {int} timeoutMS 
+ * 若timeout == -1 无事件将阻塞，如果timeout大于0时才会设置超时
  */
 int Epoller::wait(int timeoutMS) {
     /*因为events_是vector，所以应该取events_[0]数据所在的地址才对*/

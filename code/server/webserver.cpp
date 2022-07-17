@@ -5,18 +5,17 @@ bool WebServer::isET = false;
 /**
  * @description: 构造函数中初始化各类资源
  */
-WebServer::WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int sqlPort,
+WebServer::WebServer(int port, int trigMode, int timeoutMS, bool openLinger, int sqlPort,
                      const char *sqlUser, const char *sqlPwd, const char *dbName, int connPoolNum,
                      int threadNum, bool openLog, int logLevel, int logQueSize)
     : port_(port),
       timeoutMS_(timeoutMS),
-      openLinger_(optLinger),
       isClose_(false),
       epoller_(new Epoller()),
       timer_(new HeapTimer()),
       threadPool_(new ThreadPool(threadNum)) {
     // 当前工作目录是指命令行窗口中运行程序的目录
-    /*获取资源目录*/
+    /*获取资源目录，返回的是堆内存中的*/
     srcDir_ = getcwd(nullptr, 256);
     assert(srcDir_);
     strncat(srcDir_, "/resources/", 16);
@@ -30,7 +29,7 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int 
     initEventMode_(trigMode);
 
     /*初始化监听套接字*/
-    if (!initSocket_()) {
+    if (!initListenFd_(openLinger)) {
         isClose_ = true;
     }
 
@@ -42,7 +41,7 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int 
             LOG_ERROR("====================Server init error!===================");
         } else {
             LOG_INFO("=============Server init================");
-            LOG_INFO("Port: %d,OpenLinger: %s", port, optLinger ? "true" : "false");
+            LOG_INFO("Port: %d,OpenLinger: %s", port, openLinger ? "true" : "false");
             LOG_INFO("Listen Mode: %s, Conn Mode: %s", (listenEvent_ & EPOLLET ? "ET" : "LT"),
                      (connEvent_ & EPOLLET ? "ET" : "LT"));
             LOG_INFO("Log level: %d", logLevel);
@@ -106,21 +105,11 @@ void WebServer::initEventMode_(int trigMode) {
 }
 
 /**
- * @description: 设置文件描述符为非阻塞
- * @param {int} fd
- */
-int WebServer::setFdNonblock(int fd) {
-    assert(fd > 0);
-    int old_option = fcntl(fd, F_GETFL);
-    int new_option = old_option | O_NONBLOCK;
-    fcntl(fd, F_SETFL, new_option);
-    return old_option;
-}
-
-/**
  * @description: 创建本机监听描述符
+ * @param {bool} openLinger 对于残存在套接字发送队列中的数据：丢弃或者将发送至对端，优雅关闭连接
+ * @return {bool}
  */
-bool WebServer::initSocket_() {
+bool WebServer::initListenFd_(bool openLinger) {
     int ret = 0;
 
     /*合法性检查*/
@@ -144,7 +133,7 @@ bool WebServer::initSocket_() {
 
     /*设置openLinger项*/
     struct linger optLinger = {0};
-    if (openLinger_) {
+    if (openLinger) {
         /*优雅关闭: 直到所剩数据发送完毕或超时*/
         optLinger.l_onoff  = 1;
         optLinger.l_linger = 1;
@@ -200,6 +189,18 @@ bool WebServer::initSocket_() {
 }
 
 /**
+ * @description: 设置文件描述符为非阻塞
+ * @param {int} fd
+ */
+int WebServer::setFdNonblock(int fd) {
+    assert(fd > 0);
+    int old_option = fcntl(fd, F_GETFL);
+    int new_option = old_option | O_NONBLOCK;
+    fcntl(fd, F_SETFL, new_option);
+    return old_option;
+}
+
+/**
  * @description: 向客户端发送错误消息
  * @param {int} fd
  * @param {char} *info
@@ -215,7 +216,17 @@ void WebServer::sendError_(int fd, const char *info) {
 }
 
 /**
- * @description: 关闭客户端连接
+ * @description: 更新计时器中的过期时间
+ */
+void WebServer::extentTime_(HttpConn *client) {
+    assert(client);
+    if (timeoutMS_ > 0) {
+        timer_->adjust(client->getFd(), timeoutMS_);
+    }
+}
+
+/**
+ * @description: 关闭客户端连接，主要是移除epoll监听、关闭连接类对象
  * @param {HttpConn} *client
  */
 void WebServer::closeConn_(HttpConn *client) {
@@ -226,7 +237,7 @@ void WebServer::closeConn_(HttpConn *client) {
 }
 
 /**
- * @description: 初始化httpconn类对象，添加对应连接的计时器，添加epoll监听事件
+ * @description: 初始化httpconn类对象，添加epoll监听事件和对应连接的计时器
  * @param {int} fd
  * @param {sockaddr_in} addr
  */
@@ -234,14 +245,16 @@ void WebServer::addClient_(int fd, sockaddr_in addr) {
     assert(fd > 0);
     /*初始化httpconn类对象*/
     users_[fd].init(fd, addr);
+
+    /*添加epoll监听EPOLLIN事件，连接设置为非阻塞*/
+    epoller_->addFd(fd, EPOLLIN | connEvent_);
+    setFdNonblock(fd);
+
     if (timeoutMS_ > 0) {
         /*若设置了超时事件，则需要向定时器里添加这一项*/
         // 使用bind绑定到成员函数时，即使成员函数不需参数，也要将this绑定在第一个参数
         timer_->add(fd, timeoutMS_, std::bind(&WebServer::closeConn_, this, &users_[fd]));
     }
-    /*添加epoll监听EPOLLIN事件，连接设置为非阻塞*/
-    epoller_->addFd(fd, EPOLLIN | connEvent_);
-    setFdNonblock(fd);
 
     LOG_INFO("Client[%d] in!", users_[fd].getFd());
 }
@@ -263,7 +276,7 @@ void WebServer::dealListen_() {
         } else if (HttpConn::userCount >= MAX_FD) {
             /*当前连接数太多，超过了预定义了最大数量，向客户端发送错误信息*/
             sendError_(fd, "Server busy!");
-            LOG_WARN("Clients is full!");
+            LOG_WARN("Clients is full and reject a connectin!");
             return;
         }
         /*添加客户事件*/
@@ -272,13 +285,53 @@ void WebServer::dealListen_() {
 }
 
 /**
- * @description: 更新计时器中的过期时间
+ * @description: 读取socket传来的数据，读取后调用onProcess函数处理
+ * @param {HttpConn} *client
  */
-void WebServer::extentTime_(HttpConn *client) {
+void WebServer::onRead_(HttpConn *client) {
     assert(client);
-    if (timeoutMS_ > 0) {
-        timer_->adjust(client->getFd(), timeoutMS_);
+    int ret       = -1;
+    int readErrno = 0;
+
+    /*调用httpconn类的read方法，读取数据*/
+    ret = client->read(&readErrno);
+    if (ret < 0 && readErrno != EAGAIN) {
+        /*若返回值小于0，且信号不为EAGAIN说明发生了错误*/
+        closeConn_(client);
+        return;
     }
+    /*调用onProcess函数解析数据*/
+    onProcess_(client);
+}
+
+/**
+ * @description: 向对应的socket发送响应报文数据
+ * @param {HttpConn} *client
+ */
+void WebServer::onWrite_(HttpConn *client) {
+    assert(client);
+    int ret        = -1;
+    int writeErrno = 0;
+
+    /*调用httpconn类的write方法向socket发送数据*/
+    ret = client->write(&writeErrno);
+    if (client->bytesNeedWrite() == 0) {
+        /*完成传输，检查客户端是否设置了长连接字段*/
+        if (client->isKeepAlive()) {
+            /*如果客户端设置了长连接，那么重新注册epoll的EPOLLIN事件*/
+            epoller_->modFd(client->getFd(), connEvent_ | EPOLLIN);
+            return;
+        }
+    } else if (ret < 0) {
+        /*若是缓冲区满了，errno会返回EAGAIN*/
+        if (writeErrno == EAGAIN) {
+            /*若返回值小于0，且信号为EAGAIN说明数据还没有发送完，重新在EPOLL上注册该连接的EPOLLOUT事件*/
+            epoller_->modFd(client->getFd(), connEvent_ | EPOLLOUT);
+            return;
+        }
+    }
+    /*其余情况，关闭连接*/
+    closeConn_(client);
 }
 
 /**
@@ -296,63 +349,13 @@ void WebServer::onProcess_(HttpConn *client) {
 }
 
 /**
- * @description: 读取socket传来的数据，并调用onProcess函数处理
- * @param {HttpConn} *client
- */
-void WebServer::onRead_(HttpConn *client) {
-    assert(client);
-    int ret       = -1;
-    int readErrno = 0;
-
-    /*调用httpconn类的read方法，读取数据*/
-    ret = client->read(&readErrno);
-    if (ret <= 0 && readErrno != EAGAIN) {
-        /*若返回值小于0，且信号不为EAGAIN说明发生了错误*/
-        closeConn_(client);
-        return;
-    }
-    /*调用onProcess函数解析数据*/
-    onProcess_(client);
-}
-
-/**
- * @description: 处理连接中的读取数据事件，调整当前连接的过期时间，向线程池中添加读数据的任务
+ * @description: 读取一个客户端连接发送来的数据，调整当前连接的过期时间，向线程池中添加读数据的任务
  * @param {HttpConn} *client
  */
 void WebServer::dealRead_(HttpConn *client) {
     assert(client);
     extentTime_(client);
     threadPool_->addTask(std::bind(&WebServer::onRead_, this, client));
-}
-
-/**
- * @description: 向对应的socket发送响应报文数据
- * @param {HttpConn} *client
- */
-void WebServer::onWrite_(HttpConn *client) {
-    assert(client);
-    int ret        = -1;
-    int writeErrno = 0;
-
-    /*调用httpconn类的write方法向socket发送数据*/
-    ret = client->write(&writeErrno);
-    if (client->bytesNeedWrite() == 0) {
-        /*如果还需要写的数据为0，那么完成传输，检查客户端是否设置了长连接字段*/
-        if (client->isKeepAlive()) {
-            /*如果客户端设置了长连接，那么调用OnProcess函数，因为此时的client->process()会返回false，所以该连接会重新注册epoll的EPOLLIN事件*/
-            onProcess_(client);
-            return;
-        }
-    } else if (ret < 0) {
-        /*若是缓冲区满了，errno会返回EAGAIN，这时需要重新注册EPOLL上的EPOLLOUT事件*/
-        if (writeErrno == EAGAIN) {
-            /*若返回值小于0，且信号为EAGAIN说明数据还没有发送完，重新在EPOLL上注册该连接的EPOLLOUT事件*/
-            epoller_->modFd(client->getFd(), connEvent_ | EPOLLOUT);
-            return;
-        }
-    }
-    /*其余情况，关闭连接*/
-    closeConn_(client);
 }
 
 /**
@@ -366,10 +369,9 @@ void WebServer::dealWrite_(HttpConn *client) {
 }
 
 /**
- * @description: 启动服务器，主线程工作处
+ * @description: 启动服务器，主线程工作
  */
 void WebServer::start() {
-    /*epoll wait timeout == -1 无事件将阻塞，如果timeout大于0时才会设置超时信号，后面可以改为根据最接近的超时事件设置超时时长*/
     int timeMS = -1;
     if (!isClose_) {
         LOG_INFO("================Server start================");
@@ -391,10 +393,10 @@ void WebServer::start() {
 
             /*根据不同情况进入不同分支*/
             if (fd == listenFd_) {
-                /*若对应文件描述符为监听描述符，进入文件处理流程*/
+                /* 新客户端连接 */
                 dealListen_();
             } else if (events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) {
-                /*若epoll事件为 (EPOLLRDHUP | EPOLLHUP | EPOLLERR) 其中之一，表示连接出现问题，需要关闭该连接*/
+                /*表示连接出现问题，需要关闭该连接*/
                 assert(users_.count(fd) > 0);
                 closeConn_(&users_[fd]);
             } else if (events & EPOLLIN) {

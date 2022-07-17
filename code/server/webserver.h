@@ -1,7 +1,7 @@
 /*
  * @Description  : 服务器类
  * @Date         : 2022-07-16 01:14:06
- * @LastEditTime : 2022-07-17 01:58:47
+ * @LastEditTime : 2022-07-17 15:33:34
  */
 #ifndef MY_WEBSERVER_WEBSERVER_H
 #define MY_WEBSERVER_WEBSERVER_H
@@ -30,14 +30,11 @@ private:
 
     static bool isET;  // 指示本地监听的工作模式
 
-    int port_;       // 监听的端口
-    int listenFd_;   // 监听的文件描述符
-    int timeoutMS_;  // 超时时间
-
-    bool openLinger_;  // 对于残存在套接字发送队列中的数据：丢弃或者将发送至对端，优雅关闭连接。
-    bool isClose_;     // 指示InitSocket操作是否成功
-
-    char *srcDir_;  // 资源文件目录
+    int   port_;       // 监听的端口
+    int   listenFd_;   // 监听的文件描述符
+    int   timeoutMS_;  // 超时时间
+    bool  isClose_;    // 指示InitSocket操作是否成功
+    char *srcDir_;     // 资源文件目录
 
     uint32_t listenEvent_;  // 监听描述符上的epoll事件
     uint32_t connEvent_;    // 客户端连接的socket描述符上的epoll事件
@@ -59,7 +56,7 @@ public:
 private:
     static int setFdNonblock(int fd);
 
-    bool initSocket_();
+    bool initListenFd_(bool openLinger);
     void initEventMode_(int trigMode);
     void addClient_(int fd, sockaddr_in addr);
 
