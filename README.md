@@ -22,7 +22,7 @@
 
 ### 流程图
 
-![](flowchart.png)
+![](./flowchart.png)
 
 
 
