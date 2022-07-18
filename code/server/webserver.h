@@ -1,7 +1,7 @@
 /*
  * @Description  : 服务器类
  * @Date         : 2022-07-16 01:14:06
- * @LastEditTime : 2022-07-18 00:02:08
+ * @LastEditTime : 2022-07-18 16:49:26
  */
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
@@ -26,15 +26,31 @@
 
 class WebServer {
 private:
+    /* 构造函数参数 */
+
+    int  port_;        // 监听的端口
+    int  trigMode_;    // 触发模式
+    int  timeoutMS_;   // 超时时间
+    bool openLinger_;  // 优雅关闭
+    int  threadNum_;   // 线程数量
+
+    int         sqlPort_;     // 数据库端口
+    int         sqlConnNum_;  // MySQL连接数量
+    std::string sqlUser_;     // 用户
+    std::string sqlPwd_;      // 密码
+    std::string dbName_;      // 数据库名称
+
+    bool openLog_;     // 开启日志
+    int  logLevel_;    // 日志级别
+    int  logQueSize_;  // 日志队列大小
+
+private:
     static const int MAX_FD = 65536;  // 最大文件描述符数量
 
-    static bool isET;  // 指示本地监听的工作模式
-
-    int   port_;       // 监听的端口
-    int   listenFd_;   // 监听的文件描述符
-    int   timeoutMS_;  // 超时时间
-    bool  isClose_;    // 指示InitSocket操作是否成功
-    char *srcDir_;     // 资源文件目录
+    static bool isET;       // 指示本地监听的工作模式
+    int         listenFd_;  // 监听的文件描述符
+    bool        isClose_;   // 指示InitSocket操作是否成功
+    char       *srcDir_;    // 资源文件目录
 
     uint32_t listenEvent_;  // 监听描述符上的epoll事件
     uint32_t connEvent_;    // 客户端连接的socket描述符上的epoll事件
@@ -45,19 +61,21 @@ private:
     std::unordered_map<int, HttpConn> users_;       // 连接用到时再实例化
 
 public:
-    WebServer(int port, int trigMode, int timeoutMS, bool optLinger, int sqlPort,
-              const char *sqlUser, const char *sqlPwd, const char *dbName, int connPoolNum,
-              int threadNum, bool openLog, int logLevel, int logQueSize);
+    WebServer(std::tuple<int, int, int, bool, int>                        &webConf,
+              std::tuple<int, std::string, std::string, std::string, int> &sqlConf,
+              std::tuple<bool, int, int>                                  &logConf);
 
     ~WebServer();
 
-    void run();
+    void initServer();
+
+    void runServer();
 
 private:
     static int setFdNonblock(int fd);
 
-    bool initListenFd_(bool openLinger);
-    void initEventMode_(int trigMode);
+    bool initListenFd_();
+    void initEventMode_();
     void addClient_(int fd, sockaddr_in addr);
 
     void dealListen_();

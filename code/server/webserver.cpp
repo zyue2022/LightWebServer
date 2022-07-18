@@ -3,17 +3,24 @@
 bool WebServer::isET = false;
 
 /**
- * @description: 构造函数中初始化各类资源
+ * @description: 构造函数中获取配置参数
  */
-WebServer::WebServer(int port, int trigMode, int timeoutMS, bool openLinger, int sqlPort,
-                     const char *sqlUser, const char *sqlPwd, const char *dbName, int connPoolNum,
-                     int threadNum, bool openLog, int logLevel, int logQueSize)
-    : port_(port),
-      timeoutMS_(timeoutMS),
-      isClose_(false),
-      epoller_(new Epoller()),
-      timer_(new HeapTimer()),
-      threadPool_(new ThreadPool(threadNum)) {
+WebServer::WebServer(std::tuple<int, int, int, bool, int>                        &webConf,
+                     std::tuple<int, std::string, std::string, std::string, int> &sqlConf,
+                     std::tuple<bool, int, int>                                  &logConf) {
+    std::tie(port_, trigMode_, timeoutMS_, openLinger_, threadNum_) = webConf;
+    std::tie(sqlPort_, sqlUser_, sqlPwd_, dbName_, sqlConnNum_)     = sqlConf;
+    std::tie(openLog_, logLevel_, logQueSize_) = logConf;
+}
+/**
+ * @description: 初始化各类资源
+ */
+void WebServer::initServer() {
+    // make_unique只是完美转发了它的参数到它要创建的对象的构造函数中去
+    epoller_    = std::make_unique<Epoller>();
+    timer_      = std::make_unique<HeapTimer>();
+    threadPool_ = std::make_unique<ThreadPool>(threadNum_);
+
     // 当前工作目录是指命令行窗口中运行程序的目录
     /*获取资源目录，返回的是堆内存中的*/
     srcDir_ = getcwd(nullptr, 256);
@@ -23,30 +30,31 @@ WebServer::WebServer(int port, int trigMode, int timeoutMS, bool openLinger, int
     /*初始化http连接类的静态变量值以及数据库连接池*/
     HttpConn::userCount = 0;
     HttpConn::srcDir    = srcDir_;
-    SqlConnPool::instance()->init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
+    std::string host_   = "localhost";
+    SqlConnPool::instance()->init(host_, sqlPort_, sqlUser_, sqlPwd_, dbName_, sqlConnNum_);
 
     /*根据参数设置连接事件与监听事件的出发模式LT或ET*/
-    initEventMode_(trigMode);
+    initEventMode_();
 
     /*初始化监听套接字*/
-    if (!initListenFd_(openLinger)) {
+    if (!initListenFd_()) {
         isClose_ = true;
     }
 
     /*日志开关*/
-    if (openLog) {
+    if (openLog_) {
         /*初始化LOG类设置*/
-        Log::instance()->init(logLevel, "./log", ".log", logQueSize);
+        Log::instance()->init(logLevel_, "./log", ".log", logQueSize_);
         if (isClose_) {
             LOG_ERROR("====================Server init error!===================");
         } else {
-            LOG_INFO("=============Server init================");
-            LOG_INFO("Port: %d,OpenLinger: %s", port, openLinger ? "true" : "false");
+            LOG_INFO("================Server init===================");
+            LOG_INFO("Port: %d, OpenLinger: %s", port_, openLinger_ ? "true" : "false");
             LOG_INFO("Listen Mode: %s, Conn Mode: %s", (listenEvent_ & EPOLLET ? "ET" : "LT"),
                      (connEvent_ & EPOLLET ? "ET" : "LT"));
-            LOG_INFO("Log level: %d", logLevel);
+            LOG_INFO("Log level: %d", logLevel_);
             LOG_INFO("srcDir: %s", srcDir_);
-            LOG_INFO("SqlConnPool num: %d, ThreadPool num: %d", connPoolNum, threadNum);
+            LOG_INFO("SqlConnPool num: %d, ThreadPool num: %d", sqlConnNum_, threadNum_);
         }
     }
 }
@@ -72,12 +80,12 @@ WebServer::~WebServer() {
  * E                POLLONESHOT：只监听一次事件，当监听完后如果还需要监听这个socket，就要再次把这个socket加入到EPOLL队列里
  * @param {int} trigMode
  */
-void WebServer::initEventMode_(int trigMode) {
+void WebServer::initEventMode_() {
     listenEvent_ = EPOLLHUP;
     /*EPOLLONESHOT，为了保证当前连接在同一时刻只被一个线程处理*/
     connEvent_ = EPOLLONESHOT | EPOLLRDHUP;
     /*根据触发模式设置对应选项*/
-    switch (trigMode) {
+    switch (trigMode_) {
         case 0:
             // 默认LT
             break;
@@ -109,7 +117,7 @@ void WebServer::initEventMode_(int trigMode) {
  * @param {bool} openLinger 对于残存在套接字发送队列中的数据：丢弃或者将发送至对端，优雅关闭连接
  * @return {bool}
  */
-bool WebServer::initListenFd_(bool openLinger) {
+bool WebServer::initListenFd_() {
     int ret = 0;
 
     /*合法性检查*/
@@ -133,7 +141,7 @@ bool WebServer::initListenFd_(bool openLinger) {
 
     /*设置openLinger项*/
     struct linger optLinger = {0};
-    if (openLinger) {
+    if (openLinger_) {
         /*优雅关闭: 直到所剩数据发送完毕或超时*/
         optLinger.l_onoff  = 1;
         optLinger.l_linger = 1;
@@ -371,10 +379,10 @@ void WebServer::dealWrite_(HttpConn *client) {
 /**
  * @description: 启动服务器，主线程工作
  */
-void WebServer::run() {
+void WebServer::runServer() {
     int timeMS = -1;
     if (!isClose_) {
-        LOG_INFO("================Server run================");
+        LOG_INFO("================Server run====================");
     }
 
     /*根据不同的事件调用不同的函数*/

@@ -26,8 +26,8 @@ SqlConnPool *SqlConnPool::instance() {
 /**
  * @description: 初始化数据库连接池
  */
-void SqlConnPool::init(const char *host, int port, const char *user, const char *pwd,
-                       const char *dbName, int connSize) {
+void SqlConnPool::init(std::string &host, int port, std::string &user, std::string &pwd,
+                       std::string &dbName, int connSize) {
     assert(connSize > 0);
     for (int i = 0; i < connSize; i++) {
         /*初始化以及配置一个sql连接*/
@@ -37,7 +37,8 @@ void SqlConnPool::init(const char *host, int port, const char *user, const char 
             LOG_ERROR("Mysql init error!");
             assert(sql);
         }
-        sql = mysql_real_connect(sql, host, user, pwd, dbName, port, nullptr, 0);
+        sql = mysql_real_connect(sql, host.c_str(), user.c_str(), pwd.c_str(), dbName.c_str(), port,
+                                 nullptr, 0);
         if (!sql) {
             LOG_ERROR("MySql Connect error!");
             assert(sql);

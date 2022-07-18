@@ -229,7 +229,10 @@ void Log::write(int level, const char *format, ...) {
     appendLogLevelTitle_(level);
 
     /*根据用户传入的参数，向缓冲区添加数据*/
-    va_start(vaList, format);  // 这里format中由用户的写入信息，将其添加到自定义缓冲区中
+    va_start(vaList, format);  
+    // 这里format指形参类型是const char*
+    // 可变参数宏通过分析第一个字符串参数中的占位符个数来确定形参的个数；
+    // 通过占位符的不同来确定参数类型（%d表示int类型、%s表示char *）
     int m = vsnprintf(buff_.beginWrite(), buff_.writableBytes(), format, vaList);
     va_end(vaList);
     buff_.hasWritten(m);

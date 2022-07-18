@@ -1,7 +1,7 @@
 /*
  * @Description  : MySQL连接池类，单例模式，线程同步
  * @Date         : 2022-07-16 01:14:06
- * @LastEditTime : 2022-07-16 23:42:26
+ * @LastEditTime : 2022-07-18 16:54:41
  */
 #ifndef MY_WEBSERVER_SQLCONNPOLL_H
 #define MY_WEBSERVER_SQLCONNPOLL_H
@@ -23,20 +23,20 @@ private:
     std::mutex mtx_;    // 互斥量
     sem_t      semId_;  // 信号量
 
-    std::queue<MYSQL *> connQue_;  // 连接队列
+    std::queue<MYSQL*> connQue_;  // 连接队列
 
 private:
     SqlConnPool() = default;
     ~SqlConnPool();
 
 public:
-    static SqlConnPool *instance();
+    static SqlConnPool* instance();
 
-    void init(const char *host, int port, const char *user, const char *pwd, const char *dbName,
+    void init(std::string& host, int port, std::string& user, std::string& pwd, std::string& dbName,
               int connSize);
 
-    MYSQL *getConn();
-    void   freeConn(MYSQL *sql);
+    MYSQL* getConn();
+    void   freeConn(MYSQL* sql);
 
     int getFreeConnCount();
 
