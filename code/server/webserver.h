@@ -1,7 +1,7 @@
 /*
  * @Description  : 服务器类
  * @Date         : 2022-07-16 01:14:06
- * @LastEditTime : 2022-07-18 16:49:26
+ * @LastEditTime : 2022-07-21 02:06:39
  */
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
@@ -14,15 +14,20 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <filesystem>
+#include <fstream>
 #include <unordered_map>
 
 #include "../http/httpconn.h"
+#include "../json/Json.h"
 #include "../logsys/log.h"
 #include "../pool/sqlconnRAII.h"
 #include "../pool/sqlconnpool.h"
 #include "../pool/threadpool.h"
 #include "../timer/heaptimer.h"
 #include "epoller.h"
+
+using namespace lightJson;
 
 class WebServer {
 private:
@@ -47,10 +52,10 @@ private:
 private:
     static const int MAX_FD = 65536;  // 最大文件描述符数量
 
-    static bool isET;       // 指示本地监听的工作模式
-    int         listenFd_;  // 监听的文件描述符
-    bool        isClose_;   // 指示InitSocket操作是否成功
-    char       *srcDir_;    // 资源文件目录
+    static bool isET;             // 指示本地监听的工作模式
+    int         listenFd_;        // 监听的文件描述符
+    bool        isClose_{false};  // 指示InitSocket操作是否成功
+    char       *srcDir_;          // 资源文件目录
 
     uint32_t listenEvent_;  // 监听描述符上的epoll事件
     uint32_t connEvent_;    // 客户端连接的socket描述符上的epoll事件
@@ -61,6 +66,8 @@ private:
     std::unordered_map<int, HttpConn> users_;       // 连接用到时再实例化
 
 public:
+    WebServer(const Json &json);
+
     WebServer(std::tuple<int, int, int, bool, int>                        &webConf,
               std::tuple<int, std::string, std::string, std::string, int> &sqlConf,
               std::tuple<bool, int, int>                                  &logConf);

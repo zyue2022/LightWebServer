@@ -1,0 +1,21 @@
+{
+    "webConf": {
+        "port": 10000,
+        "trigMode": 3,
+        "timeoutMS": 60000,
+        "openLinger": true,
+        "threadNum": 6
+    },
+    "sqlConf": {
+        "sqlPort": 3306,
+        "sqlUser": "root",
+        "sqlPwd": "12345678",
+        "dbName": "webdb",
+        "sqlConnNum": 12
+    },
+    "logConf": {
+        "openLog": true,
+        "logLevel": 0,
+        "logQueSize": 1024
+    }
+}

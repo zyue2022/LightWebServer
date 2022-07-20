@@ -1,14 +1,32 @@
+- [WebServerLinux](#webserverlinux)
+	- [工作流程](#工作流程)
+		- [流程图](#流程图)
+	- [线程池模块](#线程池模块)
+	- [缓冲区模块](#缓冲区模块)
+	- [Epoll模块](#epoll模块)
+	- [HTTP连接模块](#http连接模块)
+	- [HTTP解析模块](#http解析模块)
+	- [HTTP响应模块](#http响应模块)
+	- [定时器模块](#定时器模块)
+	- [日志模块](#日志模块)
+	- [阻塞队列模块](#阻塞队列模块)
+	- [MySQL连接池模块](#mysql连接池模块)
+	- [Json解析模块](#json解析模块)
+	- [WebServer模块](#webserver模块)
+	- [参考及致谢](#参考及致谢)
+
 # WebServerLinux
 
 高性能并发服务器，由`webbench`测试可达到上万QPS；
 
-【关键词】
+**【关键词】**
 
-**C++11、IO多路复用技术Epoll、Reactor高并发模型、线程池、异步日志系统、最小堆定时器、数据库连接池、有限状态机、自增长缓冲区、单例模式**
+**C++11、IO多路复用技术Epoll、Reactor高并发模型、线程池、异步日志系统、最小堆定时器、数据库连接池、有限状态机、自增长缓冲区、单例模式、自定义Json解析器**
 
 ---
 
-### 工作流程
+
+## 工作流程
 
 1. 本服务器项目采用的是**同步I/O**(`epoll_wait`)实现`Reactor`事件处理模式；
 2. 主线程负责监听文件描述符上是否有事件发生、接受新连接，工作线程负责读写数据，处理客户请求；
@@ -22,22 +40,9 @@
 
 ### 流程图
 
-![](./flowchart.png)
-
-
-
-### 参考内容
-
-- [https://github.com/markparticle/WebServer](https://github.com/markparticle/WebServer)
-- **《Linux高性能服务器编程》游双**
-- [牛客网C++课程 - 项目实战](https://www.nowcoder.com/study/live/504)
-- [https://github.com/InnovatorZhang/my-WebServer](https://github.com/InnovatorZhang/my-WebServer)
-
-
+![](./img/flowchart.jpg)
 
 ---
-
-> TODO:	加入Json解析模块，读取本地配置文件；
 
 ## 线程池模块
 
@@ -144,6 +149,10 @@
 - 因为连接总数一定且有限，所以使用**互斥量**和**信号量**来同步线程，将信号量初始化为数据库的连接总数；
 - 每次取出连接使信号量原子减1，释放连接使信号量原子加1，若连接池内没有连接了，则阻塞等待；
 
+## Json解析模块
+- 自定义简易Json解析模块，读取本地配置文件来初始化服务器；
+- 详见[lightJson](https://github.com/zyue2022/lightJson);
+
 ## WebServer模块
 
 - 该模块就是服务器程序的核心模块，联系起各个子功能模块，主线程就是运行它；
@@ -165,4 +174,12 @@
 ```
 
 ---
+
+## 参考及致谢
+
+- **《Linux高性能服务器编程》游双**
+- [牛客网C++课程 - 项目实战](https://www.nowcoder.com/study/live/504)
+- [@markparticle](https://github.com/markparticle/WebServer)、[@InnovatorZhang](https://github.com/InnovatorZhang/my-WebServer)
+
+
 

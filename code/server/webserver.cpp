@@ -3,6 +3,28 @@
 bool WebServer::isET = false;
 
 /**
+ * @description: 从json文件中获取配置参数
+ * @param {Json} &json
+ */
+WebServer::WebServer(const Json &json) {
+    port_       = json["webConf"]["port"].toNumber();
+    trigMode_   = json["webConf"]["trigMode"].toNumber();
+    timeoutMS_  = json["webConf"]["timeoutMS"].toNumber();
+    openLinger_ = json["webConf"]["openLinger"].toBool();
+    threadNum_  = json["webConf"]["threadNum"].toNumber();
+
+    sqlPort_    = json["sqlConf"]["sqlPort"].toNumber();
+    sqlUser_    = json["sqlConf"]["sqlUser"].toString();
+    sqlPwd_     = json["sqlConf"]["sqlPwd"].toString();
+    dbName_     = json["sqlConf"]["dbName"].toString();
+    sqlConnNum_ = json["sqlConf"]["sqlConnNum"].toNumber();
+
+    openLog_    = json["logConf"]["openLog"].toBool();
+    logLevel_   = json["logConf"]["logLevel"].toNumber();
+    logQueSize_ = json["logConf"]["logQueSize"].toNumber();
+}
+
+/**
  * @description: 构造函数中获取配置参数
  */
 WebServer::WebServer(std::tuple<int, int, int, bool, int>                        &webConf,
@@ -10,8 +32,9 @@ WebServer::WebServer(std::tuple<int, int, int, bool, int>                       
                      std::tuple<bool, int, int>                                  &logConf) {
     std::tie(port_, trigMode_, timeoutMS_, openLinger_, threadNum_) = webConf;
     std::tie(sqlPort_, sqlUser_, sqlPwd_, dbName_, sqlConnNum_)     = sqlConf;
-    std::tie(openLog_, logLevel_, logQueSize_) = logConf;
+    std::tie(openLog_, logLevel_, logQueSize_)                      = logConf;
 }
+
 /**
  * @description: 初始化各类资源
  */
