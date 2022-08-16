@@ -154,7 +154,7 @@
 
 ## Json解析模块
 - 自定义简易Json解析模块，读取本地配置文件来初始化服务器；
-- 详见[LightJson](https://github.com/zyue2022/LightJson);
+- 详见另一个仓库[LightJson](https://github.com/zyue2022/LightJson);
 
 ## WebServer模块
 
