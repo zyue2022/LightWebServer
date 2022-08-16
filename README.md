@@ -27,7 +27,7 @@
 
 ---
 
-
+> 相对于[旧版](https://github.com/zyue2022/WeakServer)改变很大！
 
 ## 工作流程
 
@@ -154,7 +154,7 @@
 
 ## Json解析模块
 - 自定义简易Json解析模块，读取本地配置文件来初始化服务器；
-- 详见[lightJson](https://github.com/zyue2022/lightJson);
+- 详见[LightJson](https://github.com/zyue2022/LightJson);
 
 ## WebServer模块
 
